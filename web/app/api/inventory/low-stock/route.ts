@@ -1,11 +1,9 @@
-
-import { NextRequest } from 'next/server';
 import { mockInventory } from '@/lib/mock';
 
 const useMock = process.env.USE_MOCK_API === 'true';
 const BASE = process.env.BACKEND_BASE;
 
-export async function GET(_req: NextRequest) {
+export async function GET() {
   if (useMock || !BASE) {
     const data = mockInventory.filter(r => r.low_stock || r.quantity <= 2);
     return Response.json(data);

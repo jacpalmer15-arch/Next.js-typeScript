@@ -2,6 +2,7 @@ import './globals.css';
 import type { Metadata } from 'next';
 import Providers from './providers';
 import Link from 'next/link';
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
   title: 'Xeinth Admin',
@@ -22,6 +23,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </nav>
           </header>
           {children}
+          {/* Sonner toaster */}
+          <Toaster />
         </Providers>
       </body>
     </html>

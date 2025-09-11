@@ -1,4 +1,3 @@
-
 export type Product = {
   clover_item_id: string;
   name: string;
@@ -8,6 +7,7 @@ export type Product = {
   visible_in_kiosk?: boolean;
   price?: number | null;
 };
+
 export type InventoryRow = {
   clover_item_id: string;
   name?: string;

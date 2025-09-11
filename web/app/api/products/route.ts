@@ -1,4 +1,3 @@
-
 import { NextRequest } from 'next/server';
 import { mockProducts } from '@/lib/mock';
 
@@ -11,7 +10,7 @@ export async function GET(req: NextRequest) {
   const category = req.nextUrl.searchParams.get('category') || '';
 
   if (useMock || !BASE) {
-    let data = mockProducts;
+    let data = mockProducts.slice();
     if (search) {
       const s = search.toLowerCase();
       data = data.filter(
