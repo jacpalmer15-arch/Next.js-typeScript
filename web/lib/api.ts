@@ -1,6 +1,5 @@
-import { Product, InventoryRow } from './types';
 
-const BASE = process.env.NEXT_PUBLIC_API_BASE || '';
+import { Product, InventoryRow } from './types';
 
 function withQS(path: string, params?: Record<string, any>) {
   if (!params) return path;
@@ -14,12 +13,18 @@ function withQS(path: string, params?: Record<string, any>) {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, {
+  const res = await fetch(path, {
     ...init,
     headers: { 'Content-Type': 'application/json', ...(init?.headers || {}) },
+    cache: 'no-store',
   });
   if (!res.ok) throw new Error(await res.text());
-  return res.json() as Promise<T>;
+  const contentType = res.headers.get('content-type') || '';
+  if (contentType.includes('application/json')) {
+    return res.json() as Promise<T>;
+  }
+  // allow plain text for sync responses
+  return (await res.text()) as unknown as T;
 }
 
 export const api = {
@@ -32,9 +37,10 @@ export const api = {
     lowStock: () => request<InventoryRow[]>('/api/inventory/low-stock'),
   },
   sync: {
-    products: () => request<{ success: boolean; count?: number; message?: string }>(
-      '/api/products/sync',
-      { method: 'POST' }
-    ),
+    products: () =>
+      request<{ success: boolean; count?: number; message?: string }>(
+        '/api/products/sync',
+        { method: 'POST' }
+      ),
   },
 };
