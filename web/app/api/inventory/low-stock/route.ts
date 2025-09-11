@@ -1,17 +1,7 @@
-import { mockInventory } from '@/lib/mock';
-
-const useMock = process.env.USE_MOCK_API === 'true';
-const BASE = process.env.BACKEND_BASE;
-
+const BASE = process.env.BACKEND_BASE!;
 export async function GET() {
-  if (useMock || !BASE) {
-    const data = mockInventory.filter(r => r.low_stock || r.quantity <= 2);
-    return Response.json(data);
-  }
   const upstream = await fetch(`${BASE}/api/inventory/low-stock`, { cache: 'no-store' });
   const text = await upstream.text();
-  return new Response(text, {
-    status: upstream.status,
-    headers: { 'Content-Type': upstream.headers.get('content-type') ?? 'application/json' },
-  });
+  if (!upstream.ok) return new Response(text, { status: upstream.status });
+  try { return Response.json(JSON.parse(text)); } catch { return Response.json([]); }
 }

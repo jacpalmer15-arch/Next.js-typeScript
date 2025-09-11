@@ -18,21 +18,16 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     cache: 'no-store',
   });
 
-  const raw = await res.text();               // read once
-  if (!res.ok) {
-    // include body text in the thrown error for visibility
-    throw new Error(`HTTP ${res.status} ${res.statusText}\n${raw}`);
-  }
+  const raw = await res.text(); // read once so we can parse or show errors
+  if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}\n${raw}`);
 
-  // Prefer header, but still try to parse JSON even if header is wrong/missing
-  const ct = res.headers.get('content-type') || '';
-  if (ct.includes('application/json')) {
-    try { return JSON.parse(raw) as T; } catch { /* fall through */ }
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    // allow plain text responses (e.g., sync message)
+    return raw as unknown as T;
   }
-  try { return JSON.parse(raw) as T; } catch { /* not JSON */ }
-  return raw as unknown as T;                 // final fallback
 }
-
 
 export const api = {
   products: {

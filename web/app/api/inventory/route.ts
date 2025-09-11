@@ -1,14 +1,23 @@
-import { mockInventory } from '@/lib/mock';
+const BASE = process.env.BACKEND_BASE!;
 
-const useMock = process.env.USE_MOCK_API === 'true';
-const BASE = process.env.BACKEND_BASE;
+function normalizeRow(x: any) {
+  return {
+    clover_item_id: x.clover_item_id ?? x.id ?? x.itemId ?? String(x.upc ?? ''),
+    name: x.name ?? x.product_name ?? null,
+    quantity: typeof x.quantity === 'number' ? x.quantity : Number(x.quantity ?? 0),
+  };
+}
 
 export async function GET() {
-  if (useMock || !BASE) return Response.json(mockInventory);
   const upstream = await fetch(`${BASE}/api/inventory`, { cache: 'no-store' });
   const text = await upstream.text();
-  return new Response(text, {
-    status: upstream.status,
-    headers: { 'Content-Type': upstream.headers.get('content-type') ?? 'application/json' },
-  });
+  if (!upstream.ok) return new Response(text, { status: upstream.status });
+
+  try {
+    const json = JSON.parse(text);
+    const arr = Array.isArray(json) ? json : Array.isArray(json?.data) ? json.data : [];
+    return Response.json(arr.map(normalizeRow));
+  } catch {
+    return Response.json([]);
+  }
 }
