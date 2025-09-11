@@ -3,31 +3,15 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-
-type Row = {
-  clover_item_id: string;
-  name?: string;
-  quantity: number;
-  low_stock?: boolean;
-};
+import { InventoryRow } from '@/lib/types';
 
 export default function InventoryPage() {
-  const {
-    data: all,
-    isLoading: l1,
-    isError: e1,
-    error: er1,
-  } = useQuery<Row[]>({
+  const { data: all, isLoading: l1, isError: e1, error: er1 } = useQuery<InventoryRow[]>({
     queryKey: ['inventory'],
     queryFn: api.inventory.all,
   });
 
-  const {
-    data: low,
-    isLoading: l2,
-    isError: e2,
-    error: er2,
-  } = useQuery<Row[]>({
+  const { data: low, isLoading: l2, isError: e2, error: er2 } = useQuery<InventoryRow[]>({
     queryKey: ['inventory-low'],
     queryFn: api.inventory.lowStock,
   });
@@ -53,14 +37,15 @@ export default function InventoryPage() {
   );
 }
 
-function InventoryTable({ rows, empty }: { rows: Row[]; empty: string }) {
+function InventoryTable({ rows, empty }: { rows: InventoryRow[]; empty: string }) {
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full text-left text-sm">
         <thead className="border-b bg-gray-50">
           <tr>
             <th className="px-3 py-2">Name</th>
-            <th className="px-3 py-2">Qty</th>
+            <th className="px-3 py-2">On Hand</th>
+            <th className="px-3 py-2">Reorder Level</th>
             <th className="px-3 py-2">Clover Item</th>
           </tr>
         </thead>
@@ -68,7 +53,8 @@ function InventoryTable({ rows, empty }: { rows: Row[]; empty: string }) {
           {rows.map((r) => (
             <tr key={r.clover_item_id} className="border-b">
               <td className="px-3 py-2">{r.name ?? '-'}</td>
-              <td className="px-3 py-2">{r.quantity}</td>
+              <td className="px-3 py-2">{r.on_hand}</td>
+              <td className="px-3 py-2">{r.reorder_level ?? '-'}</td>
               <td className="px-3 py-2">{r.clover_item_id}</td>
             </tr>
           ))}

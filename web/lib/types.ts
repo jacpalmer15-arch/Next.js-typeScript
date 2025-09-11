@@ -5,12 +5,13 @@ export type Product = {
   sku?: string | null;
   upc?: string | null;
   visible_in_kiosk?: boolean;
-  price?: number | null;
+  price?: number | null; // cents
 };
 
 export type InventoryRow = {
   clover_item_id: string;
-  name?: string;
-  quantity: number;
+  name?: string | null;
+  on_hand: number;
+  reorder_level: number | null;
   low_stock?: boolean;
 };
