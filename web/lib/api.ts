@@ -1,4 +1,5 @@
 import { Product, InventoryRow } from './types';
+import { supabase } from './supabase';
 
 function withQS(path: string, params?: Record<string, any>) {
   if (!params) return path;
@@ -11,10 +12,25 @@ function withQS(path: string, params?: Record<string, any>) {
   return q ? `${path}?${q}` : path;
 }
 
+async function getAuthHeaders() {
+  const { data: { session } } = await supabase.auth.getSession();
+  const headers: Record<string, string> = { 
+    'Content-Type': 'application/json'
+  };
+  
+  if (session?.access_token) {
+    headers['Authorization'] = `Bearer ${session.access_token}`;
+  }
+  
+  return headers;
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const headers = await getAuthHeaders();
+  
   const res = await fetch(path, {
     ...init,
-    headers: { 'Content-Type': 'application/json', ...(init?.headers || {}) },
+    headers: { ...headers, ...(init?.headers || {}) },
     cache: 'no-store',
   });
 
