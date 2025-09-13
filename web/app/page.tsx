@@ -14,7 +14,7 @@ export default function Home() {
           </div>
         </header>
 
-        <section className="mt-6 grid gap-4 md:grid-cols-3">
+        <section className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Link href="/products" className="block">
             <Card className="hover:shadow-md transition-shadow">
               <CardHeader><CardTitle>Products</CardTitle></CardHeader>
@@ -25,6 +25,12 @@ export default function Home() {
             <Card className="hover:shadow-md transition-shadow">
               <CardHeader><CardTitle>Inventory</CardTitle></CardHeader>
               <CardContent>Stock levels and low-stock alerts.</CardContent>
+            </Card>
+          </Link>
+          <Link href="/checkout" className="block">
+            <Card className="hover:shadow-md transition-shadow">
+              <CardHeader><CardTitle>Checkout</CardTitle></CardHeader>
+              <CardContent>Point of Sale system for processing orders.</CardContent>
             </Card>
           </Link>
           <Link href="/sync" className="block">
