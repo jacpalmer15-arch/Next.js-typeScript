@@ -103,7 +103,7 @@ describe('ProductsPage', () => {
 
     renderWithQueryClient(<ProductsPage />)
     
-    expect(screen.getByText('Loading…')).toBeInTheDocument()
+    expect(screen.getByText('Loading products…')).toBeInTheDocument()
   })
 
   it('shows error state', async () => {

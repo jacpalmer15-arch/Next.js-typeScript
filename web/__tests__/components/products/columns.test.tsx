@@ -51,8 +51,8 @@ describe('Product Columns', () => {
       invalidateQueries: jest.fn(),
     }
     
-    mockUseMutation.mockReturnValue(mockMutation as any)
-    mockUseQueryClient.mockReturnValue(mockQueryClient as any)
+    mockUseMutation.mockReturnValue(mockMutation as ReturnType<typeof useMutation>)
+    mockUseQueryClient.mockReturnValue(mockQueryClient as ReturnType<typeof useQueryClient>)
   })
 
   const mockProduct: Product = {
@@ -69,7 +69,7 @@ describe('Product Columns', () => {
     const nameColumn = productColumns[0]
     const cellContent = nameColumn.cell!({ 
       row: { original: mockProduct } 
-    } as any)
+    } as { row: { original: typeof mockProduct } })
     
     const { container } = render(
       <QueryClientProvider client={queryClient}>
@@ -108,7 +108,7 @@ describe('Product Columns', () => {
     
     const cellContent = kioskColumn.cell!({ 
       row: { original: mockProduct } 
-    } as any)
+    } as { row: { original: typeof mockProduct } })
     
     const { container } = render(
       <QueryClientProvider client={queryClient}>
@@ -125,12 +125,12 @@ describe('Product Columns', () => {
     mockUseMutation.mockReturnValue({
       mutate: mockMutate,
       isPending: false,
-    } as any)
+    } as ReturnType<typeof useMutation>)
 
     const kioskColumn = productColumns[4]
     const cellContent = kioskColumn.cell!({ 
       row: { original: mockProduct } 
-    } as any)
+    } as ReturnType<typeof useMutation>)
     
     render(
       <QueryClientProvider client={queryClient}>
@@ -150,12 +150,12 @@ describe('Product Columns', () => {
     mockUseMutation.mockReturnValue({
       mutate: jest.fn(),
       isPending: true,
-    } as any)
+    } as ReturnType<typeof useMutation>)
 
     const kioskColumn = productColumns[4]
     const cellContent = kioskColumn.cell!({ 
       row: { original: mockProduct } 
-    } as any)
+    } as ReturnType<typeof useMutation>)
     
     render(
       <QueryClientProvider client={queryClient}>
