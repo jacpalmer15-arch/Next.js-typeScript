@@ -1,4 +1,4 @@
-import { Product, InventoryRow } from './types';
+import { Product, InventoryRow, Order, OrderStatus } from './types';
 
 function withQS(path: string, params?: Record<string, any>) {
   if (!params) return path;
@@ -43,6 +43,16 @@ export const api = {
   inventory: {
     all: () => request<InventoryRow[]>('/api/inventory'),
     lowStock: () => request<InventoryRow[]>('/api/inventory/low-stock'),
+  },
+  orders: {
+    list: (opts?: { status?: OrderStatus; customer?: string; from_date?: string; to_date?: string }) =>
+      request<Order[]>(withQS('/api/orders', opts)),
+    get: (id: string) => request<Order>(`/api/orders/${id}`),
+    updateStatus: (id: string, status: OrderStatus) =>
+      request<Order>(`/api/orders/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status }),
+      }),
   },
   sync: {
     products: () =>
