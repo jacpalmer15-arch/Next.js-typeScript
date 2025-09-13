@@ -1,22 +1,23 @@
 const BASE = process.env.BACKEND_BASE!;
 
-function toNumber(v: any, def = 0) {
+function toNumber(v: unknown, def = 0) {
   const n = typeof v === 'number' ? v : Number(v);
   return Number.isFinite(n) ? n : def;
 }
 
-function toNullableNumber(v: any) {
+function toNullableNumber(v: unknown) {
   if (v === null || v === undefined || v === '') return null;
   const n = Number(v);
   return Number.isFinite(n) ? n : null;
 }
 
-function normalizeRow(x: any) {
-  const on_hand = toNumber(x?.on_hand ?? x?.quantity ?? 0, 0);
-  const reorder_level = toNullableNumber(x?.reorder_level ?? x?.min ?? null);
+function normalizeRow(x: unknown) {
+  const item = x as any; // TODO: Define proper interface  
+  const on_hand = toNumber(item?.on_hand ?? item?.quantity ?? 0, 0);
+  const reorder_level = toNullableNumber(item?.reorder_level ?? item?.min ?? null);
   return {
-    clover_item_id: x?.clover_item_id ?? x?.id ?? x?.itemId ?? String(x?.upc ?? ''),
-    name: x?.name ?? x?.product_name ?? null,
+    clover_item_id: item?.clover_item_id ?? item?.id ?? item?.itemId ?? String(item?.upc ?? ''),
+    name: item?.name ?? item?.product_name ?? null,
     on_hand,
     reorder_level,
   };

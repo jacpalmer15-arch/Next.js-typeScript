@@ -3,10 +3,14 @@ export async function GET() {
   const text = await res.text();
   if (!res.ok) return new Response(text, { status: res.status });
 
-  let items: any[] = [];
+  let items: unknown[] = [];
   try { items = JSON.parse(text); } catch { return Response.json([]); }
 
   const set = new Set<string>();
-  for (const p of items) if (p.category) set.add(String(p.category));
+  for (const p of items) {
+    if (p && typeof p === 'object' && 'category' in p && p.category) {
+      set.add(String(p.category));
+    }
+  }
   return Response.json(Array.from(set).sort());
 }

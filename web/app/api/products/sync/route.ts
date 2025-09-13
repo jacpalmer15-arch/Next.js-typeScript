@@ -17,10 +17,10 @@ export async function POST() {
       status: upstream.status,
       headers: { 'Content-Type': upstream.headers.get('content-type') ?? 'application/json' },
     });
-  } catch (e: any) {
-    const msg = e?.name === 'AbortError'
+  } catch (e: unknown) {
+    const msg = (e as Error)?.name === 'AbortError'
       ? `Upstream sync timed out after ${SYNC_TIMEOUT_MS}ms`
-      : (e?.message || 'Upstream sync failed');
+      : ((e as Error)?.message || 'Upstream sync failed');
     return new Response(JSON.stringify({ success: false, error: msg }), {
       status: 504,
       headers: { 'Content-Type': 'application/json' },
