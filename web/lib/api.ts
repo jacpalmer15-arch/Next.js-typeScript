@@ -1,6 +1,7 @@
-import { Product, InventoryRow } from './types';
+import { Product, InventoryRow } from './auth-types';
+import { supabase } from './supabase';
 
-function withQS(path: string, params?: Record<string, any>) {
+function withQS(path: string, params?: Record<string, unknown>) {
   if (!params) return path;
   const qs = new URLSearchParams(
     Object.entries(params)
@@ -12,9 +13,22 @@ function withQS(path: string, params?: Record<string, any>) {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  // Get the current session for auth headers
+  const { data: { session } } = await supabase.auth.getSession();
+  
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(init?.headers || {}),
+  };
+  
+  // Add authorization header if we have a session
+  if (session?.access_token) {
+    headers.Authorization = `Bearer ${session.access_token}`;
+  }
+
   const res = await fetch(path, {
     ...init,
-    headers: { 'Content-Type': 'application/json', ...(init?.headers || {}) },
+    headers,
     cache: 'no-store',
   });
 

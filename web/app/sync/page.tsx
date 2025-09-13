@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { AdminLayout } from '@/components/layout/AdminLayout';
 
 export default function SyncPage() {
   const qc = useQueryClient();
@@ -23,21 +24,24 @@ export default function SyncPage() {
         qc.invalidateQueries({ queryKey: ['inventory'] });
         qc.invalidateQueries({ queryKey: ['inventory-low'] });
       }
-    } catch (e: any) {
-      setStatus(e?.name === 'AbortError' ? 'Canceled.' : String(e?.message || e));
+    } catch (e: unknown) {
+      const error = e as { name?: string; message?: string };
+      setStatus(error?.name === 'AbortError' ? 'Canceled.' : String(error?.message || e));
     } finally { setRunning(false); abortRef.current = null; }
   }
 
   return (
-    <main className="mx-auto max-w-6xl p-6">
-      <h1 className="text-xl font-semibold">Sync</h1>
-      <div className="mt-4 flex gap-3">
-        <button onClick={runProductSync} disabled={running}
-          className="rounded-md border px-3 py-2 text-sm hover:bg-gray-50 disabled:opacity-50">
-          {running ? 'Running…' : 'Run Product Sync'}
-        </button>
+    <AdminLayout>
+      <div className="max-w-6xl">
+        <h1 className="text-xl font-semibold">Sync</h1>
+        <div className="mt-4 flex gap-3">
+          <button onClick={runProductSync} disabled={running}
+            className="rounded-md border px-3 py-2 text-sm hover:bg-gray-50 disabled:opacity-50">
+            {running ? 'Running…' : 'Run Product Sync'}
+          </button>
+        </div>
+        {status && <pre className="mt-4 whitespace-pre-wrap rounded border bg-gray-50 p-3 text-sm">{status}</pre>}
       </div>
-      {status && <pre className="mt-4 whitespace-pre-wrap rounded border bg-gray-50 p-3 text-sm">{status}</pre>}
-    </main>
+    </AdminLayout>
   );
 }
