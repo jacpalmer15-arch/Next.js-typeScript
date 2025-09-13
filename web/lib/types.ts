@@ -15,3 +15,15 @@ export type InventoryRow = {
   reorder_level: number | null;
   low_stock?: boolean;
 };
+
+export type InventoryAdjustment = {
+  clover_item_id: string;
+  adjustment: number; // positive for increase, negative for decrease
+  reason?: string;
+};
+
+export type InventoryAdjustmentResponse = {
+  success: boolean;
+  new_quantity?: number;
+  message?: string;
+};

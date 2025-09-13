@@ -1,6 +1,6 @@
-import { Product, InventoryRow } from './types';
+import { Product, InventoryRow, InventoryAdjustment, InventoryAdjustmentResponse } from './types';
 
-function withQS(path: string, params?: Record<string, any>) {
+function withQS(path: string, params?: Record<string, string | number | boolean>) {
   if (!params) return path;
   const qs = new URLSearchParams(
     Object.entries(params)
@@ -43,6 +43,11 @@ export const api = {
   inventory: {
     all: () => request<InventoryRow[]>('/api/inventory'),
     lowStock: () => request<InventoryRow[]>('/api/inventory/low-stock'),
+    adjust: (adjustment: InventoryAdjustment) =>
+      request<InventoryAdjustmentResponse>('/api/inventory/adjust', {
+        method: 'POST',
+        body: JSON.stringify(adjustment),
+      }),
   },
   sync: {
     products: () =>
