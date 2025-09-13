@@ -42,7 +42,7 @@ export default function ProductDetailPage() {
     formState: { errors, isDirty },
   } = useForm<FormData>({
     // Make the resolver generics explicit so TS knows output matches FormData
-    resolver: zodResolver<FormData, any, FormData>(Schema),
+    resolver: zodResolver(Schema),
     defaultValues: {
       name: '',
       category: '',
@@ -72,7 +72,7 @@ export default function ProductDetailPage() {
       const clean: FormData = {
         ...values,
         price:
-          values.price === null || values.price === undefined || Number.isNaN(values.price as any)
+          values.price === null || values.price === undefined || Number.isNaN(values.price as number)
             ? undefined
             : values.price,
       };
@@ -83,7 +83,7 @@ export default function ProductDetailPage() {
       qc.invalidateQueries({ queryKey: ['products'] });
       qc.invalidateQueries({ queryKey: ['product', id] });
     },
-    onError: (e: any) => toast.error(typeof e === 'string' ? e : 'Save failed'),
+    onError: (e: Error) => toast.error(typeof e === 'string' ? e : 'Save failed'),
   });
 
   if (isLoading) return <main className="mx-auto max-w-3xl p-6">Loading…</main>;
@@ -119,7 +119,7 @@ export default function ProductDetailPage() {
               inputMode="numeric"
               // Convert '' -> undefined; string -> number
               {...register('price', {
-                setValueAs: (v) =>
+                setValueAs: (v: string) =>
                   v === '' || v === null || v === undefined ? undefined : Number(v),
               })}
             />
