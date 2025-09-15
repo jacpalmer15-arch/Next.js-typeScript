@@ -110,7 +110,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         router.push('/')
       }
       return {}
-    } catch (error) {
+    } catch {
       return { error: 'An unexpected error occurred' }
     }
   }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { useQueryClient, useQuery } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { AdminLayout } from '@/components/layout/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,10 +9,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { api } from '@/lib/api';
 import { FeatureFlags, MerchantProfile, CloverConnection } from '@/lib/types';
 import { toast } from 'sonner';
-import { Settings, Sync, Plug, Building2 } from 'lucide-react';
+import { Settings, RefreshCw, Plug, Building2 } from 'lucide-react';
 
 export default function SyncPage() {
   const qc = useQueryClient();
@@ -122,7 +121,7 @@ export default function SyncPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Sync className="h-5 w-5" />
+              <RefreshCw className="h-5 w-5" />
               Data Synchronization
             </CardTitle>
           </CardHeader>
@@ -133,7 +132,7 @@ export default function SyncPage() {
                 disabled={running}
                 className="flex items-center gap-2"
               >
-                <Sync className={`h-4 w-4 ${running ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`h-4 w-4 ${running ? 'animate-spin' : ''}`} />
                 {running ? 'Syncing...' : 'Sync Products'}
               </Button>
             </div>

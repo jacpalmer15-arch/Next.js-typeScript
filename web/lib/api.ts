@@ -86,7 +86,7 @@ export const api = {
       total: number;
       payment_method: PaymentMethod;
     }) =>
-      request<{ success: boolean; order: any; message: string }>('/api/orders', {
+      request<{ success: boolean; order: Order; message: string }>('/api/orders', {
         method: 'POST',
         body: JSON.stringify(orderData),
       }),

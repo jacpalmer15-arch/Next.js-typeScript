@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Order, OrderStatus } from '@/lib/types'
 import { formatCurrency, formatDateTime } from '@/lib/utils'
-import { X, User, Mail, Calendar, Package, DollarSign } from 'lucide-react'
+import { X, User, Mail, Calendar, Package } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'

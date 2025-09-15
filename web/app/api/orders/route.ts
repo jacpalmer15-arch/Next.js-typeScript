@@ -169,7 +169,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { items, subtotal, tax, total, payment_method } = body as {
+    const { items, payment_method } = body as {
       items: CartItem[];
       subtotal: number;
       tax: number;
@@ -200,7 +200,7 @@ export async function POST(req: NextRequest) {
       status: 'pending',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-      total_amount: total,
+      total_amount: body.total,
       items: items.map((item, index) => ({
         id: `item_${Date.now()}_${index}`,
         clover_item_id: item.clover_item_id,
