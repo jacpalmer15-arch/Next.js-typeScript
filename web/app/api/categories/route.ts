@@ -1,9 +1,11 @@
+import { Product } from '@/lib/types';
+
 export async function GET() {
   const res = await fetch(`${process.env.BACKEND_BASE}/api/products`, { cache: 'no-store' });
   const text = await res.text();
   if (!res.ok) return new Response(text, { status: res.status });
 
-  let items: any[] = [];
+  let items: Product[] = [];
   try { items = JSON.parse(text); } catch { return Response.json([]); }
 
   const set = new Set<string>();
