@@ -23,8 +23,9 @@ export default function SyncPage() {
         qc.invalidateQueries({ queryKey: ['inventory'] });
         qc.invalidateQueries({ queryKey: ['inventory-low'] });
       }
-    } catch (e: any) {
-      setStatus(e?.name === 'AbortError' ? 'Canceled.' : String(e?.message || e));
+    } catch (e: unknown) {
+      const err = e as Error;
+      setStatus(err?.name === 'AbortError' ? 'Canceled.' : String(err?.message || err));
     } finally { setRunning(false); abortRef.current = null; }
   }
 
