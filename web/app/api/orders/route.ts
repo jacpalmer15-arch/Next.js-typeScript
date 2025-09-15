@@ -1,8 +1,8 @@
 import { NextRequest } from 'next/server';
-import { Order } from '@/lib/types';
+import { Order, CartItem, PaymentMethod } from '@/lib/types';
 
 // Mock data for orders since there's no backend yet
-const mockOrders: Order[] = [
+let mockOrders: Order[] = [
   {
     id: 'ord_001',
     customer_name: 'John Doe',
@@ -164,4 +164,80 @@ export async function GET(req: NextRequest) {
   filteredOrders.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   return Response.json(filteredOrders);
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const { items, subtotal, tax, total, payment_method } = body as {
+      items: CartItem[];
+      subtotal: number;
+      tax: number;
+      total: number;
+      payment_method: PaymentMethod;
+    };
+
+    // Validate required fields
+    if (!items || items.length === 0) {
+      return Response.json(
+        { error: 'Order must contain at least one item' },
+        { status: 400 }
+      );
+    }
+
+    if (!payment_method || !['card', 'cash', 'gift_card'].includes(payment_method)) {
+      return Response.json(
+        { error: 'Invalid payment method' },
+        { status: 400 }
+      );
+    }
+
+    // Create new order
+    const newOrder: Order = {
+      id: `ord_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      customer_name: undefined, // POS orders typically don't have customer info
+      customer_email: undefined,
+      status: 'pending',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      total_amount: total,
+      items: items.map((item, index) => ({
+        id: `item_${Date.now()}_${index}`,
+        clover_item_id: item.clover_item_id,
+        name: item.name,
+        quantity: item.quantity,
+        unit_price: item.price,
+        total_price: item.price * item.quantity,
+      })),
+    };
+
+    // Simulate processing delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Simulate payment processing (in a real app, integrate with payment processor)
+    const paymentSuccess = Math.random() > 0.1; // 90% success rate for demo
+
+    if (paymentSuccess) {
+      newOrder.status = 'paid';
+      newOrder.updated_at = new Date().toISOString();
+      mockOrders.push(newOrder);
+
+      return Response.json({
+        success: true,
+        order: newOrder,
+        message: 'Order processed successfully'
+      }, { status: 201 });
+    } else {
+      return Response.json(
+        { error: 'Payment processing failed. Please try again.' },
+        { status: 402 }
+      );
+    }
+  } catch (error) {
+    console.error('Order processing error:', error);
+    return Response.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
 }
