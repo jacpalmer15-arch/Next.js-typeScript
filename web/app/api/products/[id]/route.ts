@@ -2,12 +2,13 @@ import { NextRequest } from 'next/server';
 import { supabase } from '@/lib/supabaseClient';
 import { Product } from '@/lib/types';
 
-export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const { data, error } = await supabase
       .from('products')
       .select('*')
-      .eq('clover_item_id', params.id)
+      .eq('clover_item_id', id)
       .single();
 
     if (error) {
@@ -37,8 +38,9 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   }
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const body = await req.json().catch(() => ({}));
     
     // Prepare update object, ensuring only valid Product fields are updated
@@ -54,7 +56,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     const { data, error } = await supabase
       .from('products')
       .update(updateData)
-      .eq('clover_item_id', params.id)
+      .eq('clover_item_id', id)
       .select()
       .single();
 
