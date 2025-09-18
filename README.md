@@ -1,7 +1,16 @@
 # Next.js-typeScript
-# Zenith Self-Checkout Admin System
 
-Front end of Self Checkout App - A comprehensive Next.js TypeScript application for managing a self-checkout system with Point of Sale functionality.
+Front end of Self Checkout App - A Next.js TypeScript application for managing a self-checkout system with Point of Sale functionality.
+
+## Features
+
+- **Product Management**: View, search, and manage product inventory
+- **Inventory Tracking**: Monitor stock levels and low-stock alerts
+- **Point of Sale (Checkout)**: Complete POS system for processing orders
+- **Payment Processing**: Support for card, cash, and gift card payments
+- **Order Management**: Track and process customer orders
+- **Sync Operations**: Synchronize data with external systems
+# Zenith Self-Checkout Admin System
 
 ## Features
 
@@ -150,6 +159,11 @@ The checkout system provides a complete POS interface:
 7. Wait for payment confirmation
 8. Order complete - cart automatically clears
 
+### Sync Operations (`/sync`)
+
+- Synchronize product data
+- Update inventory levels
+- Import/export data
 ### Sync & Settings (`/sync`)
 
 - **Data Synchronization**: Sync products and inventory with external systems
@@ -189,6 +203,7 @@ Create a new order
   "success": true,
   "order": {
     "id": "order_123",
+    "status": "completed",
     "status": "paid",
     "items": [...],
     "total": 8697,
@@ -199,6 +214,17 @@ Create a new order
 ```
 
 #### GET `/api/orders`
+Retrieve recent orders
+
+**Response:**
+```json
+{
+  "success": true,
+  "orders": [...],
+  "count": 10
+}
+```
+
 Retrieve orders with optional filtering
 
 **Query Parameters:**
@@ -209,7 +235,6 @@ Retrieve orders with optional filtering
 
 ## Architecture
 
-- **Frontend**: Next.js 15 with TypeScript and React 19
 - **Authentication**: Supabase Auth with route guards
 - **Styling**: Tailwind CSS with shadcn/ui components
 - **State Management**: React hooks + React Query for server state
@@ -294,6 +319,16 @@ Tests run on multiple Node.js versions (18, 20) to ensure compatibility.
 - Payment processing includes simulated success/failure scenarios
 - All monetary values are stored in cents for precision
 - Tax rate is currently set to 8.75% (configurable)
+
+## Testing
+
+The application includes comprehensive test coverage for:
+- Checkout functionality and user interactions
+- API endpoints and data validation
+- Order processing and payment handling
+- Cart management and calculations
+
+Tests use Jest with React Testing Library for frontend testing and Node.js environment for API testing.
 - Authentication requires Supabase configuration for full functionality
 
 ## Contributing

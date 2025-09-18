@@ -1,3 +1,12 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { CartItem, PaymentMethod, Order } from '@/lib/types';
+
+// Mock order storage (in a real app, this would be a database)
+const orders: Order[] = [];
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
 import { NextRequest } from 'next/server';
 import { Order, CartItem, PaymentMethod } from '@/lib/types';
 
@@ -235,7 +244,23 @@ export async function POST(req: NextRequest) {
     }
   } catch (error) {
     console.error('Order processing error:', error);
-    return Response.json(
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET() {
+  try {
+    return NextResponse.json({
+      success: true,
+      orders: orders.slice(-20), // Return last 20 orders
+      count: orders.length
+    });
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
     );

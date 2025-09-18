@@ -14,7 +14,6 @@ export default function Home() {
             <Button variant="outline">Sync</Button>
           </div>
         </header>
-
         <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Link href="/products" className="block">
             <Card className="hover:shadow-md transition-shadow">
