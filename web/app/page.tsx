@@ -14,8 +14,7 @@ export default function Home() {
             <Button variant="outline">Sync</Button>
           </div>
         </header>
-
-        <section className="grid gap-4 md:grid-cols-3">
+        <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Link href="/products" className="block">
             <Card className="hover:shadow-md transition-shadow">
               <CardHeader><CardTitle>Products</CardTitle></CardHeader>
@@ -28,10 +27,22 @@ export default function Home() {
               <CardContent>Stock levels and low-stock alerts.</CardContent>
             </Card>
           </Link>
+          <Link href="/orders" className="block">
+            <Card className="hover:shadow-md transition-shadow">
+              <CardHeader><CardTitle>Orders</CardTitle></CardHeader>
+              <CardContent>Manage orders and order status.</CardContent>
+            </Card>
+          </Link>
+          <Link href="/checkout" className="block">
+            <Card className="hover:shadow-md transition-shadow">
+              <CardHeader><CardTitle>Checkout</CardTitle></CardHeader>
+              <CardContent>Point of Sale system for processing orders.</CardContent>
+            </Card>
+          </Link>
           <Link href="/sync" className="block">
             <Card className="hover:shadow-md transition-shadow">
-              <CardHeader><CardTitle>Sync</CardTitle></CardHeader>
-              <CardContent>Run product / inventory syncs.</CardContent>
+              <CardHeader><CardTitle>Sync & Settings</CardTitle></CardHeader>
+              <CardContent>Run product / inventory syncs and manage settings.</CardContent>
             </Card>
           </Link>
         </section>

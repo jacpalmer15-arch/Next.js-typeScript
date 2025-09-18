@@ -67,7 +67,7 @@ export default function LoginForm() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Xeinth Admin</CardTitle>
+          <CardTitle className="text-2xl font-bold">Zenith Admin</CardTitle>
           <p className="text-gray-600 mt-2">Sign in to your account</p>
         </CardHeader>
         <CardContent>

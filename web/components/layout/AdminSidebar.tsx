@@ -11,7 +11,9 @@ import {
   Home,
   LogOut,
   Menu,
-  X
+  X,
+  ShoppingCart,
+  ListOrdered
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -24,6 +26,9 @@ const navigation = [
   { name: 'Products', href: '/products', icon: Package },
   { name: 'Inventory', href: '/inventory', icon: Warehouse },
   { name: 'Sync', href: '/sync', icon: RotateCcw },
+  { name: 'Orders', href: '/orders', icon: ListOrdered },
+  { name: 'Checkout', href: '/checkout', icon: ShoppingCart },
+  { name: 'Sync & Settings', href: '/sync', icon: RotateCcw },
 ]
 
 export function AdminSidebar({ className = '' }: AdminSidebarProps) {
@@ -55,7 +60,7 @@ export function AdminSidebar({ className = '' }: AdminSidebarProps) {
         
         {/* Header */}
         <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
-          <h1 className="text-xl font-semibold text-gray-900">Xeinth Admin</h1>
+          <h1 className="text-xl font-semibold text-gray-900">Zenith Admin</h1>
           <Button
             variant="ghost"
             size="sm"

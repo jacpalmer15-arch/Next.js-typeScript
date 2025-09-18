@@ -1,34 +1,42 @@
 import '@testing-library/jest-dom'
 
-// Mock Next.js router
+// Mock fetch
+global.fetch = jest.fn()
+
+// Mock next/navigation
 jest.mock('next/navigation', () => ({
-  useRouter: () => ({
-    push: jest.fn(),
-    replace: jest.fn(),
-    prefetch: jest.fn(),
-  }),
-  usePathname: () => '/',
-  useSearchParams: () => ({
-    get: jest.fn(),
-  }),
+  useRouter() {
+    return {
+      push: jest.fn(),
+      replace: jest.fn(),
+      back: jest.fn(),
+    }
+  },
+  useParams() {
+    return {
+      id: 'test-id'
+    }
+  },
+  useSearchParams() {
+    return new URLSearchParams()
+  },
 }))
 
-// Mock Supabase client
-jest.mock('./lib/supabase', () => ({
-  supabase: {
-    auth: {
-      signInWithPassword: jest.fn(),
-      signOut: jest.fn(),
-      getSession: jest.fn(),
-      getUser: jest.fn(),
-      onAuthStateChange: jest.fn(),
-    },
-  },
-  auth: {
-    signInWithPassword: jest.fn(),
-    signOut: jest.fn(),
-    getSession: jest.fn(),
-    getUser: jest.fn(),
-    onAuthStateChange: jest.fn(),
-  },
-}))
+// Mock IntersectionObserver
+global.IntersectionObserver = class IntersectionObserver {
+  constructor() {}
+  observe() { return null; }
+  disconnect() { return null; }
+  unobserve() { return null; }
+}
+
+// Mock scrollIntoView
+Element.prototype.scrollIntoView = jest.fn()
+
+// Mock ResizeObserver
+global.ResizeObserver = class ResizeObserver {
+  constructor() {}
+  observe() { return null; }
+  disconnect() { return null; }
+  unobserve() { return null; }
+}

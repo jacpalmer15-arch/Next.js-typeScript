@@ -2,8 +2,8 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
-import { auth } from '@/lib/supabase'
-import { AuthState, User, Session } from '@/lib/auth-types'
+import { supabase } from '@/lib/supabase'
+import { AuthState, User, Session } from '@/lib/types'
 
 const AuthContext = createContext<{
   authState: AuthState
@@ -39,7 +39,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // Get initial session
     const getInitialSession = async () => {
       try {
-        const { data: { session } } = await auth.getSession()
+        const { data: { session } } = await supabase.auth.getSession()
         if (session?.user) {
           setAuthState({
             user: session.user as User,
@@ -66,7 +66,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     getInitialSession()
 
     // Listen for auth changes
-    const { data: { subscription } } = auth.onAuthStateChange(
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (session?.user) {
           setAuthState({
@@ -94,7 +94,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      const { data, error } = await auth.signInWithPassword(email, password)
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
       if (error) {
         return { error: error.message }
       }
@@ -114,15 +117,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const signOut = async () => {
     try {
-      await auth.signOut()
+      await supabase.auth.signOut()
       setAuthState({
         user: null,
         session: null,
         loading: false,
       })
       router.push('/auth/login')
-    } catch {
-      console.error('Error signing out')
+    } catch (error) {
+      console.error('Error signing out:', error)
     }
   }
 
