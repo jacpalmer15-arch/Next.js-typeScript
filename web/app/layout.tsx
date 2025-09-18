@@ -1,7 +1,7 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import Providers from './providers';
-import Link from 'next/link';
+import { AdminLayout } from '@/components/admin-layout';
 import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
@@ -23,7 +23,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Link href="/sync" className="text-gray-600 hover:text-gray-900">Sync</Link>
             </nav>
           </header>
-          {children}
+          <AdminLayout>
+            {children}
+          </AdminLayout>
           {/* Sonner toaster */}
           <Toaster />
         </Providers>

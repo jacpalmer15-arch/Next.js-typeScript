@@ -4,10 +4,12 @@ import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AdminLayout } from '@/components/layout/AdminLayout';
 import { mockProducts } from '@/lib/mock';
 import { CartItem, PaymentMethod } from '@/lib/types';
 import { Plus, Minus, Trash2, CreditCard, Banknote, Gift } from 'lucide-react';
 import { toast } from "sonner";
+import { formatCurrency } from '@/lib/utils';
 
 export default function CheckoutPage() {
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -99,7 +101,7 @@ export default function CheckoutPage() {
         throw new Error(result.error || 'Payment processing failed');
       }
 
-      toast.success(`${result.message} - Total: $${(total / 100).toFixed(2)}`);
+      toast.success(`${result.message} - Total: ${formatCurrency(total)}`);
       clearCart();
       setPaymentMethod('card');
     } catch (error) {
@@ -113,8 +115,8 @@ export default function CheckoutPage() {
   const availableProducts = mockProducts.filter(p => p.visible_in_kiosk && p.price);
 
   return (
-    <main className="min-h-dvh bg-gray-50 text-gray-900">
-      <div className="mx-auto max-w-7xl p-6">
+    <AdminLayout>
+      <div className="max-w-7xl">
         <header className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-semibold">Point of Sale - Checkout</h1>
           <Button 
@@ -142,7 +144,7 @@ export default function CheckoutPage() {
                     <div className="flex-1">
                       <h3 className="font-medium">{product.name}</h3>
                       <p className="text-sm text-gray-600">
-                        {product.category} • ${(product.price! / 100).toFixed(2)}
+                        {product.category} • {formatCurrency(product.price!)}
                       </p>
                       {product.sku && (
                         <p className="text-xs text-gray-500">SKU: {product.sku}</p>
@@ -181,7 +183,7 @@ export default function CheckoutPage() {
                         <div className="flex-1">
                           <h4 className="font-medium">{item.name}</h4>
                           <p className="text-sm text-gray-600">
-                            ${(item.price / 100).toFixed(2)} each
+                            {formatCurrency(item.price)} each
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
@@ -210,7 +212,7 @@ export default function CheckoutPage() {
                           </Button>
                         </div>
                         <div className="w-20 text-right font-medium">
-                          ${((item.price * item.quantity) / 100).toFixed(2)}
+                          {formatCurrency(item.price * item.quantity)}
                         </div>
                       </div>
                     ))
@@ -223,15 +225,15 @@ export default function CheckoutPage() {
                     <div className="border-t pt-4 space-y-2">
                       <div className="flex justify-between">
                         <span>Subtotal:</span>
-                        <span>${(subtotal / 100).toFixed(2)}</span>
+                        <span>{formatCurrency(subtotal)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Tax (8.75%):</span>
-                        <span>${(tax / 100).toFixed(2)}</span>
+                        <span>{formatCurrency(tax)}</span>
                       </div>
                       <div className="flex justify-between font-bold text-lg">
                         <span>Total:</span>
-                        <span>${(total / 100).toFixed(2)}</span>
+                        <span>{formatCurrency(total)}</span>
                       </div>
                     </div>
 
@@ -277,7 +279,7 @@ export default function CheckoutPage() {
                       onClick={handleCheckout}
                       disabled={isProcessing}
                     >
-                      {isProcessing ? 'Processing...' : `Checkout - $${(total / 100).toFixed(2)}`}
+                      {isProcessing ? 'Processing...' : `Checkout - ${formatCurrency(total)}`}
                     </Button>
                   </>
                 )}
@@ -286,6 +288,6 @@ export default function CheckoutPage() {
           </Card>
         </div>
       </div>
-    </main>
+    </AdminLayout>
   );
 }
