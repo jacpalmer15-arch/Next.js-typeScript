@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from '@/lib/auth';
+import { useAuth } from '@/lib/auth-context';
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 import Link from 'next/link';
@@ -9,7 +9,8 @@ import { LogOut, User } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { user, loading, signOut } = useAuth();
+  const { authState, signOut } = useAuth();
+  const { user, loading } = authState;
   const router = useRouter();
   const pathname = usePathname();
 

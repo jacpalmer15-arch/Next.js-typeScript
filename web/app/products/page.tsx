@@ -14,11 +14,13 @@ export default function ProductsPage() {
   const [kioskOnly, setKioskOnly] = useState(false);
   const [category, setCategory] = useState<string>('all');
 
+  // Fetch categories from /api/categories
   const { data: categories } = useQuery({
     queryKey: ['categories'],
     queryFn: api.categories.list,
   });
 
+  // Fetch products (pass category id)
   const { data = [], isLoading, isError, error, refetch } = useQuery({
     queryKey: ['products', { search, kioskOnly, category }],
     queryFn: () =>
@@ -47,11 +49,13 @@ export default function ProductsPage() {
         <div>
           <Label>Category</Label>
           <Select value={category} onValueChange={setCategory}>
-            <SelectTrigger><SelectValue placeholder="All categories" /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue placeholder="All categories" />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All</SelectItem>
-              {(categories ?? []).map((c) => (
-                <SelectItem key={c} value={c}>{c}</SelectItem>
+              {(categories ?? []).map((cat) => (
+                <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
               ))}
             </SelectContent>
           </Select>

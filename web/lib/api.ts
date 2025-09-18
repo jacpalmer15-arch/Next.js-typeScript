@@ -120,7 +120,7 @@ export const api = {
       ),
   },
   categories: {
-    list: () => request<string[]>('/api/categories'),
+    list: () => request<{ id: string; name: string }[]>('/api/categories'),
   },
   clover: {
     getConnection: () => request<CloverConnection>('/api/clover/connection'),

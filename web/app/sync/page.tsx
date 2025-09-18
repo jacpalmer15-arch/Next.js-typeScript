@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabaseClient';
 
 export default function SyncPage() {
   const qc = useQueryClient();
@@ -14,7 +15,14 @@ export default function SyncPage() {
     setRunning(true);
     try {
       abortRef.current = new AbortController();
-      const res = await fetch('/api/products/sync', { method: 'POST', signal: abortRef.current.signal });
+      // --- Get the current session and attach the JWT as Authorization header
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      const res = await fetch('/api/products/sync', {
+        method: 'POST',
+        signal: abortRef.current.signal,
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
       const text = await res.text();
       if (!res.ok) setStatus(`Error ${res.status}: ${text}`);
       else {
