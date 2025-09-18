@@ -72,7 +72,8 @@ export default function ProductDetailPage() {
       const clean: FormData = {
         ...values,
         price:
-          values.price === null || values.price === undefined || Number.isNaN(Number(values.price))
+
+          values.price === null || values.price === undefined || Number.isNaN(values.price as number)
             ? undefined
             : values.price,
       };
@@ -83,7 +84,7 @@ export default function ProductDetailPage() {
       qc.invalidateQueries({ queryKey: ['products'] });
       qc.invalidateQueries({ queryKey: ['product', id] });
     },
-    onError: (e: unknown) => toast.error(typeof e === 'string' ? e : 'Save failed'),
+    onError: (e: Error) => toast.error(typeof e === 'string' ? e : 'Save failed'),
   });
 
   if (isLoading) return <main className="mx-auto max-w-3xl p-6">Loading…</main>;
@@ -119,7 +120,7 @@ export default function ProductDetailPage() {
               inputMode="numeric"
               // Convert '' -> undefined; string -> number
               {...register('price', {
-                setValueAs: (v) =>
+                setValueAs: (v: string) =>
                   v === '' || v === null || v === undefined ? undefined : Number(v),
               })}
             />

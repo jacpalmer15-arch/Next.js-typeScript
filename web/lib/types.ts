@@ -1,3 +1,4 @@
+// Product Management Types
 export type Product = {
   clover_item_id: string;
   name: string;
@@ -16,6 +17,84 @@ export type InventoryRow = {
   low_stock?: boolean;
 };
 
+// Authentication Types
+export interface User {
+  id: string;
+  email: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface Session {
+  user: User;
+  access_token: string;
+  refresh_token?: string;
+  expires_in?: number;
+  expires_at?: number;
+}
+
+export interface AuthState {
+  user: User | null;
+  session: Session | null;
+  loading: boolean;
+}
+
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+// Order Management Types
+export type OrderStatus = 'pending' | 'paid' | 'fulfilled' | 'canceled';
+
+export type OrderItem = {
+  id: string;
+  clover_item_id: string;
+  name: string;
+  quantity: number;
+  unit_price: number; // cents
+  total_price: number; // cents
+};
+
+export type Order = {
+  id: string;
+  customer_name?: string | null;
+  customer_email?: string | null;
+  status: OrderStatus;
+  created_at: string;
+  updated_at: string;
+  total_amount: number; // cents
+  items: OrderItem[];
+  notes?: string | null;
+};
+
+// Checkout/POS Types
+export type CartItem = {
+  clover_item_id: string;
+  name: string;
+  price: number; // cents
+  quantity: number;
+  category?: string | null;
+  sku?: string | null;
+};
+
+export type PaymentMethod = 'card' | 'cash' | 'gift_card';
+
+export type CheckoutOrderStatus = 'pending' | 'processing' | 'completed' | 'cancelled';
+
+export type CheckoutOrder = {
+  id: string;
+  items: CartItem[];
+  total: number; // cents
+  tax: number; // cents
+  subtotal: number; // cents
+  payment_method: PaymentMethod;
+  status: CheckoutOrderStatus;
+  created_at: Date;
+  completed_at?: Date | null;
+};
+
+// Settings & Sync Types
 export type CloverConnection = {
   isConnected: boolean;
   merchantId?: string;

@@ -17,7 +17,8 @@ function KioskToggle({ product }: { product: Product }) {
       qc.invalidateQueries({ queryKey: ['products'] });
       toast.success('Updated');
     },
-    onError: (e: unknown) => toast.error(typeof e === 'string' ? e : 'Update failed'),
+
+    onError: (e: Error) => toast.error(typeof e === 'string' ? e : 'Update failed'),
   });
 
   return (

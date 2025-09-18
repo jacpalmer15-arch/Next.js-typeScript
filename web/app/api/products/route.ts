@@ -1,27 +1,30 @@
 import { NextRequest } from 'next/server';
+import { Product } from '@/lib/types';
 
 const BASE = process.env.BACKEND_BASE!;
 
-function normalizeProducts(payload: unknown): unknown[] {
+
+function normalizeProducts(payload: unknown): Product[] {
+  const p = payload as Record<string, unknown>
   const arr = Array.isArray(payload) ? payload
-    : Array.isArray((payload as any)?.products) ? (payload as any).products
-    : Array.isArray((payload as any)?.data) ? (payload as any).data
-    : Array.isArray((payload as any)?.items) ? (payload as any).items
+    : Array.isArray(p?.products) ? p.products
+    : Array.isArray(p?.data) ? p.data
+    : Array.isArray(p?.items) ? p.items
     : [];
   // map price_cents -> price if needed
-  return arr.map((x: unknown) => ({
-    clover_item_id: (x as any).clover_item_id ?? (x as any).id ?? (x as any).itemId ?? String((x as any).upc ?? ''),
-    name: (x as any).name ?? (x as any).title ?? 'Unnamed',
-    category: (x as any).category ?? (x as any).category_name ?? null,
-    sku: (x as any).sku ?? null,
-    upc: (x as any).upc ?? null,
-    visible_in_kiosk: (x as any).visible_in_kiosk ?? (x as any).kiosk ?? (x as any).visible ?? false,
-    price: typeof (x as any).price === 'number'
-      ? (x as any).price
-      : typeof (x as any).price_cents === 'number'
-      ? (x as any).price_cents
-      : typeof (x as any).priceInCents === 'number'
-      ? (x as any).priceInCents
+  return arr.map((x: Record<string, unknown>): Product => ({
+    clover_item_id: String(x.clover_item_id ?? x.id ?? x.itemId ?? x.upc ?? ''),
+    name: String(x.name ?? x.title ?? 'Unnamed'),
+    category: x.category ? String(x.category) : x.category_name ? String(x.category_name) : null,
+    sku: x.sku ? String(x.sku) : null,
+    upc: x.upc ? String(x.upc) : null,
+    visible_in_kiosk: Boolean(x.visible_in_kiosk ?? x.kiosk ?? x.visible ?? false),
+    price: typeof x.price === 'number'
+      ? x.price
+      : typeof x.price_cents === 'number'
+      ? x.price_cents
+      : typeof x.priceInCents === 'number'
+      ? x.priceInCents
       : null,
   }));
 }

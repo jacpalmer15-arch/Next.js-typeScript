@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 const BASE = process.env.BACKEND_BASE!;
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+  const { id } = await params
   const upstream = await fetch(`${BASE}/api/products/${id}`, { cache: 'no-store' });
   const text = await upstream.text();
   if (!upstream.ok) return new Response(text, { status: upstream.status });
@@ -29,7 +29,8 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+
+  const { id } = await params
   const body = await req.json().catch(() => ({}));
   const payload = {
     ...body,
