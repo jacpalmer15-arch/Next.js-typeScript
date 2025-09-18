@@ -62,3 +62,4 @@ jest.mock('next-themes', () => ({
   }),
   ThemeProvider: ({ children }) => children,
 }))
+
