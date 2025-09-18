@@ -1,4 +1,7 @@
 import { NextRequest } from 'next/server';
+import { supabase } from '@/lib/supabaseClient';
+import { Product } from '@/lib/types';
+
 const BASE = process.env.BACKEND_BASE!;
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -6,65 +9,97 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   const upstream = await fetch(`${BASE}/api/products/${id}`, { cache: 'no-store' });
   const text = await upstream.text();
   if (!upstream.ok) return new Response(text, { status: upstream.status });
-
+  
+  
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const x = JSON.parse(text);
-    const price = typeof x.price === 'number'
-      ? x.price
-      : typeof x.price_cents === 'number'
-      ? x.price_cents
-      : null;
-    return Response.json({
-      clover_item_id: x.clover_item_id ?? x.id ?? String(x.upc ?? ''),
-      name: x.name ?? 'Unnamed',
-      category: x.category ?? null,
-      sku: x.sku ?? null,
-      upc: x.upc ?? null,
-      visible_in_kiosk: x.visible_in_kiosk ?? false,
-      price,
-    });
-  } catch {
-    return new Response('Bad upstream JSON', { status: 502 });
+    const { id } = await params;
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('clover_item_id', id)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        // No rows returned
+        return new Response('Product not found', { status: 404 });
+      }
+      console.error('Supabase error:', error);
+      return new Response(`Database error: ${error.message}`, { status: 500 });
+    }
+
+    // Transform data to match the expected Product type format
+    const product: Product = {
+      clover_item_id: data.clover_item_id || '',
+      name: data.name || 'Unnamed',
+      category: data.category || null,
+      sku: data.sku || null,
+      upc: data.upc || null,
+      visible_in_kiosk: data.visible_in_kiosk || false,
+      price: data.price || null,
+    };
+
+    return Response.json(product);
+  } catch (err) {
+    console.error('Product GET error:', err);
+    return new Response('Internal server error', { status: 500 });
   }
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const body = await req.json().catch(() => ({}));
-  const payload = {
-    ...body,
-    // map UI 'price' -> server 'price_cents' when present
-    ...(body.price !== undefined ? { price_cents: Number(body.price) } : {}),
-  };
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {    
+    
+      try {
+    const { id } = await params;
+    const body = await req.json().catch(() => ({}));
+    
+    // Prepare update object, ensuring only valid Product fields are updated
+    const updateData: Partial<Omit<Product, 'clover_item_id'>> = {};
+    
+    if (body.name !== undefined) updateData.name = body.name;
+    if (body.category !== undefined) updateData.category = body.category;
+    if (body.sku !== undefined) updateData.sku = body.sku;
+    if (body.upc !== undefined) updateData.upc = body.upc;
+    if (body.visible_in_kiosk !== undefined) updateData.visible_in_kiosk = body.visible_in_kiosk;
+    if (body.price !== undefined) updateData.price = Number(body.price);
 
-  const upstream = await fetch(`${BASE}/api/products/${id}`, {
+    const { data, error } = await supabase
+      .from('products')
+      .update(updateData)
+      .eq('clover_item_id', id)
+      .select()
+      .single();
+      
+
+      const upstream = await fetch(`${BASE}/api/products/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
     cache: 'no-store',
   });
+    
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return new Response('Product not found', { status: 404 });
+      }
+      console.error('Supabase update error:', error);
+      return new Response(`Database error: ${error.message}`, { status: 500 });
+    }
 
-  const text = await upstream.text();
-  if (!upstream.ok) return new Response(text, { status: upstream.status });
+    // Return normalized product data
+    const product: Product = {
+      clover_item_id: data.clover_item_id || '',
+      name: data.name || 'Unnamed',
+      category: data.category || null,
+      sku: data.sku || null,
+      upc: data.upc || null,
+      visible_in_kiosk: data.visible_in_kiosk || false,
+      price: data.price || null,
+    };
 
-  // return normalized product back to UI
-  try {
-    const x = JSON.parse(text);
-    const price = typeof x.price === 'number'
-      ? x.price
-      : typeof x.price_cents === 'number'
-      ? x.price_cents
-      : null;
-    return Response.json({
-      clover_item_id: x.clover_item_id ?? x.id ?? String(x.upc ?? ''),
-      name: x.name ?? 'Unnamed',
-      category: x.category ?? null,
-      sku: x.sku ?? null,
-      upc: x.upc ?? null,
-      visible_in_kiosk: x.visible_in_kiosk ?? false,
-      price,
-    });
-  } catch {
-    return new Response('Bad upstream JSON', { status: 502 });
+    return Response.json(product);
+  } catch (err) {
+    console.error('Product PATCH error:', err);
+    return new Response('Internal server error', { status: 500 });
   }
 }

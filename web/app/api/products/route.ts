@@ -1,42 +1,52 @@
 import { NextRequest } from 'next/server';
-
-const BASE = process.env.BACKEND_BASE!;
-
-function normalizeProducts(payload: any): any[] {
-  const arr = Array.isArray(payload) ? payload
-    : Array.isArray(payload?.products) ? payload.products
-    : Array.isArray(payload?.data) ? payload.data
-    : Array.isArray(payload?.items) ? payload.items
-    : [];
-  // map price_cents -> price if needed
-  return arr.map((x: any) => ({
-    clover_item_id: x.clover_item_id ?? x.id ?? x.itemId ?? String(x.upc ?? ''),
-    name: x.name ?? x.title ?? 'Unnamed',
-    category: x.category ?? x.category_name ?? null,
-    sku: x.sku ?? null,
-    upc: x.upc ?? null,
-    visible_in_kiosk: x.visible_in_kiosk ?? x.kiosk ?? x.visible ?? false,
-    price: typeof x.price === 'number'
-      ? x.price
-      : typeof x.price_cents === 'number'
-      ? x.price_cents
-      : typeof x.priceInCents === 'number'
-      ? x.priceInCents
-      : null,
-  }));
-}
+import { supabase } from '@/lib/supabaseClient';
+import { Product } from '@/lib/types';
 
 export async function GET(req: NextRequest) {
-  const qs = req.nextUrl.search;
-  const upstream = await fetch(`${BASE}/api/products${qs}`, { cache: 'no-store' });
-  const text = await upstream.text();
-  if (!upstream.ok) return new Response(text, { status: upstream.status });
-
-  // Try JSON → normalize → JSON out. If not JSON, return empty array.
   try {
-    const json = JSON.parse(text);
-    return Response.json(normalizeProducts(json));
-  } catch {
-    return Response.json([]);
+    const { searchParams } = req.nextUrl;
+    const search = searchParams.get('search');
+    const category = searchParams.get('category');
+    const kioskOnly = searchParams.get('kiosk_only') === 'true';
+
+    // Start building the query
+    let query = supabase.from('products').select('*');
+
+    // Apply filters based on search parameters
+    if (search) {
+      // Search across name, sku, and upc fields
+      query = query.or(`name.ilike.%${search}%,sku.ilike.%${search}%,upc.ilike.%${search}%`);
+    }
+
+    if (category) {
+      query = query.eq('category', category);
+    }
+
+    if (kioskOnly) {
+      query = query.eq('visible_in_kiosk', true);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Supabase error:', error);
+      return new Response(`Database error: ${error.message}`, { status: 500 });
+    }
+
+    // Transform data to match the expected Product type format
+    const products: Product[] = (data || []).map((row) => ({
+      clover_item_id: row.clover_item_id || '',
+      name: row.name || 'Unnamed',
+      category: row.category || null,
+      sku: row.sku || null,
+      upc: row.upc || null,
+      visible_in_kiosk: row.visible_in_kiosk || false,
+      price: row.price || null, // assuming price is stored directly in cents
+    }));
+
+    return Response.json(products);
+  } catch (err) {
+    console.error('Products API error:', err);
+    return new Response('Internal server error', { status: 500 });
   }
 }
