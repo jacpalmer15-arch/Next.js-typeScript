@@ -1,5 +1,7 @@
 import type { InventoryRow } from '@/lib/types';
 import { mockInventoryData } from '@/lib/mock-data';
+import { NextRequest } from 'next/server';
+import { createBackendHeaders, validateAuthHeader, unauthorizedResponse } from '@/lib/auth-utils';
 
 const BASE = process.env.BACKEND_BASE!;
 
@@ -26,7 +28,7 @@ function normalizeRow(x: Record<string, unknown>): InventoryRow {
   };
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   // Return mock data if no backend base is configured
   if (!BASE) {
     const lowStockItems = mockInventoryData.filter((item) => {
@@ -36,8 +38,16 @@ export async function GET() {
     return Response.json(lowStockItems.map(item => ({ ...item, low_stock: true })));
   }
 
+  // Validate authentication
+  if (!validateAuthHeader(req)) {
+    return unauthorizedResponse();
+  }
+
   try {
-    const upstream = await fetch(`${BASE}/api/inventory`, { cache: 'no-store' });
+    const upstream = await fetch(`${BASE}/api/inventory`, { 
+      cache: 'no-store',
+      headers: createBackendHeaders(req)
+    });
     const text = await upstream.text();
     if (!upstream.ok) return new Response(text, { status: upstream.status });
 

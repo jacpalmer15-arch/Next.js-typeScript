@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { Product } from '@/lib/types';
+import { createBackendHeaders, validateAuthHeader, unauthorizedResponse } from '@/lib/auth-utils';
 
 const BASE = process.env.BACKEND_BASE!;
 
@@ -30,8 +31,16 @@ function normalizeProducts(payload: unknown): Product[] {
 }
 
 export async function GET(req: NextRequest) {
+  // Validate authentication
+  if (!validateAuthHeader(req)) {
+    return unauthorizedResponse();
+  }
+
   const qs = req.nextUrl.search;
-  const upstream = await fetch(`${BASE}/api/products${qs}`, { cache: 'no-store' });
+  const upstream = await fetch(`${BASE}/api/products${qs}`, { 
+    cache: 'no-store',
+    headers: createBackendHeaders(req)
+  });
   const text = await upstream.text();
   if (!upstream.ok) return new Response(text, { status: upstream.status });
 

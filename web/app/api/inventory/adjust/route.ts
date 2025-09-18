@@ -1,10 +1,16 @@
 import { NextRequest } from 'next/server';
 import type { InventoryAdjustment, InventoryAdjustmentResponse } from '@/lib/types';
+import { createBackendHeaders, validateAuthHeader, unauthorizedResponse } from '@/lib/auth-utils';
 
 const BASE = process.env.BACKEND_BASE!;
 
 export async function POST(request: NextRequest) {
   try {
+    // Validate authentication first
+    if (!validateAuthHeader(request)) {
+      return unauthorizedResponse();
+    }
+
     const body: InventoryAdjustment = await request.json();
     
     // Validate required fields
@@ -30,7 +36,7 @@ export async function POST(request: NextRequest) {
     // Forward to backend service
     const upstream = await fetch(`${BASE}/api/inventory/adjust`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: createBackendHeaders(request),
       body: JSON.stringify(body),
       cache: 'no-store',
     });

@@ -1,9 +1,19 @@
 import { NextRequest } from 'next/server';
+import { createBackendHeaders, validateAuthHeader, unauthorizedResponse } from '@/lib/auth-utils';
+
 const BASE = process.env.BACKEND_BASE!;
 
-export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  // Validate authentication
+  if (!validateAuthHeader(req)) {
+    return unauthorizedResponse();
+  }
+
   const { id } = await params
-  const upstream = await fetch(`${BASE}/api/products/${id}`, { cache: 'no-store' });
+  const upstream = await fetch(`${BASE}/api/products/${id}`, { 
+    cache: 'no-store',
+    headers: createBackendHeaders(req)
+  });
   const text = await upstream.text();
   if (!upstream.ok) return new Response(text, { status: upstream.status });
 
@@ -29,6 +39,10 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  // Validate authentication
+  if (!validateAuthHeader(req)) {
+    return unauthorizedResponse();
+  }
 
   const { id } = await params
   const body = await req.json().catch(() => ({}));
@@ -40,7 +54,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
   const upstream = await fetch(`${BASE}/api/products/${id}`, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
+    headers: createBackendHeaders(req),
     body: JSON.stringify(payload),
     cache: 'no-store',
   });
