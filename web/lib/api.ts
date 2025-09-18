@@ -80,6 +80,7 @@ export const api = {
         method: 'PATCH',
         body: JSON.stringify({ status }),
       }),
+    
     create: (orderData: {
       items: CartItem[];
       subtotal: number;
