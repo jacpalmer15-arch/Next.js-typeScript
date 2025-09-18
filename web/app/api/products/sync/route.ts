@@ -1,14 +1,22 @@
+import { NextRequest } from 'next/server';
+import { createBackendHeaders, validateAuthHeader, unauthorizedResponse } from '@/lib/auth-utils';
+
 const BASE = process.env.BACKEND_BASE!;
 const SYNC_TIMEOUT_MS = Number(process.env.SYNC_TIMEOUT_MS ?? 60000);
 
-export async function POST() {
+export async function POST(request: NextRequest) {
+  // Validate authentication
+  if (!validateAuthHeader(request)) {
+    return unauthorizedResponse();
+  }
+
   const controller = new AbortController();
   const t = setTimeout(() => controller.abort(), SYNC_TIMEOUT_MS);
 
   try {
     const upstream = await fetch(`${BASE}/api/products/sync`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: createBackendHeaders(request),
       signal: controller.signal,
       cache: 'no-store',
     });

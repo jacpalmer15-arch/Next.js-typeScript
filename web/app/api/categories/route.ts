@@ -1,7 +1,17 @@
 import { Product } from '@/lib/types';
+import { NextRequest } from 'next/server';
+import { createBackendHeaders, validateAuthHeader, unauthorizedResponse } from '@/lib/auth-utils';
 
-export async function GET() {
-  const res = await fetch(`${process.env.BACKEND_BASE}/api/products`, { cache: 'no-store' });
+export async function GET(req: NextRequest) {
+  // Validate authentication
+  if (!validateAuthHeader(req)) {
+    return unauthorizedResponse();
+  }
+
+  const res = await fetch(`${process.env.BACKEND_BASE}/api/products`, { 
+    cache: 'no-store',
+    headers: createBackendHeaders(req)
+  });
   const text = await res.text();
   if (!res.ok) return new Response(text, { status: res.status });
 

@@ -72,3 +72,21 @@ global.ResizeObserver = class ResizeObserver {
   disconnect() { return null; }
   unobserve() { return null; }
 }
+
+// Mock global Response for Node.js testing environment
+global.Response = class MockResponse {
+  constructor(body, init = {}) {
+    this.body = body;
+    this.status = init.status || 200;
+    this.statusText = init.statusText || 'OK';
+    this.headers = new Map(Object.entries(init.headers || {}));
+  }
+  
+  text() {
+    return Promise.resolve(this.body);
+  }
+  
+  json() {
+    return Promise.resolve(JSON.parse(this.body));
+  }
+};

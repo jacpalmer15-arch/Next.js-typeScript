@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { CartItem, PaymentMethod, Order } from '@/lib/types';
 
 // Mock data for orders since there's no backend yet
-let mockOrders: Order[] = [
+const mockOrders: Order[] = [
   {
     id: 'ord_001',
     customer_name: 'John Doe',
