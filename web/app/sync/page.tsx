@@ -10,7 +10,8 @@ export default function SyncPage() {
   const abortRef = useRef<AbortController | null>(null);
 
   async function runProductSync() {
-    setStatus('Starting product sync…'); setRunning(true);
+    setStatus('Starting product sync…'); 
+    setRunning(true);
     try {
       abortRef.current = new AbortController();
       const res = await fetch('/api/products/sync', { method: 'POST', signal: abortRef.current.signal });
@@ -23,9 +24,13 @@ export default function SyncPage() {
         qc.invalidateQueries({ queryKey: ['inventory'] });
         qc.invalidateQueries({ queryKey: ['inventory-low'] });
       }
-    } catch (e: any) {
-      setStatus(e?.name === 'AbortError' ? 'Canceled.' : String(e?.message || e));
-    } finally { setRunning(false); abortRef.current = null; }
+    } catch (e: unknown) {
+      const err = e as Error;
+      setStatus(err?.name === 'AbortError' ? 'Canceled.' : String(err?.message || err));
+    } finally { 
+      setRunning(false); 
+      abortRef.current = null; 
+    }
   }
 
   return (

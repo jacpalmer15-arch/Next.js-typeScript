@@ -75,9 +75,11 @@ export default function ProductsPage() {
 
       {isLoading && <p className="mt-6 text-sm text-gray-500">Loading…</p>}
       {isError && <p className="mt-6 text-sm text-red-600">{(error as Error).message}</p>}
-      {!isLoading && !isError && <div className="mt-6">
-        <DataTable columns={productColumns} data={data} />
-      </div>}
+      {!isLoading && !isError && (
+        <div className="mt-6">
+          <DataTable columns={productColumns} data={data} />
+        </div>
+      )} 
     </main>
   );
 }
