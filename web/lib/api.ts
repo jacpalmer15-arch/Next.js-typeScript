@@ -1,3 +1,4 @@
+
 import { 
   Product, 
   InventoryRow, 
@@ -126,5 +127,31 @@ export const api = {
   },
   categories: {
     list: () => request<string[]>('/api/categories'),
+  },
+  clover: {
+    getConnection: () => request<CloverConnection>('/api/clover/connection'),
+    connect: (apiKey: string) =>
+      request<CloverConnection>('/api/clover/connect', {
+        method: 'POST',
+        body: JSON.stringify({ apiKey }),
+      }),
+    disconnect: () =>
+      request<{ success: boolean }>('/api/clover/disconnect', {
+        method: 'POST',
+      }),
+  },
+  settings: {
+    getFeatureFlags: () => request<FeatureFlags>('/api/settings/feature-flags'),
+    updateFeatureFlags: (flags: FeatureFlags) =>
+      request<FeatureFlags>('/api/settings/feature-flags', {
+        method: 'PUT',
+        body: JSON.stringify(flags),
+      }),
+    getMerchantProfile: () => request<MerchantProfile>('/api/settings/merchant-profile'),
+    updateMerchantProfile: (profile: MerchantProfile) =>
+      request<MerchantProfile>('/api/settings/merchant-profile', {
+        method: 'PUT',
+        body: JSON.stringify(profile),
+      }),
   },
 };

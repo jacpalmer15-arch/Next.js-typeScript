@@ -72,6 +72,7 @@ export default function ProductDetailPage() {
       const clean: FormData = {
         ...values,
         price:
+
           values.price === null || values.price === undefined || Number.isNaN(values.price as number)
             ? undefined
             : values.price,
