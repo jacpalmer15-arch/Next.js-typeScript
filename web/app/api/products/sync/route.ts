@@ -18,6 +18,7 @@ export async function POST() {
       headers: { 'Content-Type': upstream.headers.get('content-type') ?? 'application/json' },
     });
   } catch (e: unknown) {
+
     const err = e as Error;
     const msg = err?.name === 'AbortError'
       ? `Upstream sync timed out after ${SYNC_TIMEOUT_MS}ms`

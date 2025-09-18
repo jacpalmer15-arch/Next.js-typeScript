@@ -3,6 +3,7 @@ import { Product } from '@/lib/types';
 
 const BASE = process.env.BACKEND_BASE!;
 
+
 function normalizeProducts(payload: unknown): Product[] {
   const p = payload as Record<string, unknown>
   const arr = Array.isArray(payload) ? payload

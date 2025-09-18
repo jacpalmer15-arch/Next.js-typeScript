@@ -1,4 +1,16 @@
 
+import { 
+  Product, 
+  InventoryRow, 
+  Order, 
+  OrderStatus, 
+  CartItem, 
+  PaymentMethod,
+  CloverConnection,
+  FeatureFlags,
+  MerchantProfile
+} from './types';
+import { supabase } from './supabase';
 
 function withQS(path: string, params?: Record<string, unknown>) {
   if (!params) return path;
@@ -68,6 +80,44 @@ export const api = {
         method: 'PATCH',
         body: JSON.stringify({ status }),
       }),
+    
+    create: (orderData: {
+      items: CartItem[];
+      subtotal: number;
+      tax: number;
+      total: number;
+      payment_method: PaymentMethod;
+    }) =>
+      request<{ success: boolean; order: any; message: string }>('/api/orders', {
+        method: 'POST',
+        body: JSON.stringify(orderData),
+      }),
+  },
+  clover: {
+    getConnection: () => request<CloverConnection>('/api/clover/connection'),
+    connect: (apiKey: string) =>
+      request<CloverConnection>('/api/clover/connect', {
+        method: 'POST',
+        body: JSON.stringify({ apiKey }),
+      }),
+    disconnect: () =>
+      request<{ success: boolean }>('/api/clover/disconnect', {
+        method: 'POST',
+      }),
+  },
+  settings: {
+    getFeatureFlags: () => request<FeatureFlags>('/api/settings/feature-flags'),
+    updateFeatureFlags: (flags: FeatureFlags) =>
+      request<FeatureFlags>('/api/settings/feature-flags', {
+        method: 'PUT',
+        body: JSON.stringify(flags),
+      }),
+    getMerchantProfile: () => request<MerchantProfile>('/api/settings/merchant-profile'),
+    updateMerchantProfile: (profile: MerchantProfile) =>
+      request<MerchantProfile>('/api/settings/merchant-profile', {
+        method: 'PUT',
+        body: JSON.stringify(profile),
+      }),
   },
   sync: {
     products: () =>
@@ -78,5 +128,31 @@ export const api = {
   },
   categories: {
     list: () => request<string[]>('/api/categories'),
+  },
+  clover: {
+    getConnection: () => request<CloverConnection>('/api/clover/connection'),
+    connect: (apiKey: string) =>
+      request<CloverConnection>('/api/clover/connect', {
+        method: 'POST',
+        body: JSON.stringify({ apiKey }),
+      }),
+    disconnect: () =>
+      request<{ success: boolean }>('/api/clover/disconnect', {
+        method: 'POST',
+      }),
+  },
+  settings: {
+    getFeatureFlags: () => request<FeatureFlags>('/api/settings/feature-flags'),
+    updateFeatureFlags: (flags: FeatureFlags) =>
+      request<FeatureFlags>('/api/settings/feature-flags', {
+        method: 'PUT',
+        body: JSON.stringify(flags),
+      }),
+    getMerchantProfile: () => request<MerchantProfile>('/api/settings/merchant-profile'),
+    updateMerchantProfile: (profile: MerchantProfile) =>
+      request<MerchantProfile>('/api/settings/merchant-profile', {
+        method: 'PUT',
+        body: JSON.stringify(profile),
+      }),
   },
 };

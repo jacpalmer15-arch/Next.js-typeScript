@@ -127,9 +127,10 @@ const mockOrders: Order[] = [
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const order = mockOrders.find(o => o.id === params.id);
+  const { id } = await params;
+  const order = mockOrders.find(o => o.id === id);
   
   if (!order) {
     return new Response('Order not found', { status: 404 });
@@ -140,9 +141,10 @@ export async function GET(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const orderIndex = mockOrders.findIndex(o => o.id === params.id);
+  const { id } = await params;
+  const orderIndex = mockOrders.findIndex(o => o.id === id);
   
   if (orderIndex === -1) {
     return new Response('Order not found', { status: 404 });

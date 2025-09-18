@@ -2,16 +2,19 @@ import { InventoryRow } from '@/lib/types';
 
 const BASE = process.env.BACKEND_BASE!;
 
+
 function toNumber(v: unknown, def = 0): number {
   const n = typeof v === 'number' ? v : Number(v);
   return Number.isFinite(n) ? n : def;
 }
+
 
 function toNullableNumber(v: unknown): number | null {
   if (v === null || v === undefined || v === '') return null;
   const n = Number(v);
   return Number.isFinite(n) ? n : null;
 }
+
 
 function normalizeRow(x: Record<string, unknown>): InventoryRow {
   const on_hand = toNumber(x?.on_hand ?? x?.quantity ?? 0, 0);
