@@ -1,15 +1,5 @@
-
 import { NextRequest, NextResponse } from 'next/server';
 import { CartItem, PaymentMethod, Order } from '@/lib/types';
-
-// Mock order storage (in a real app, this would be a database)
-const orders: Order[] = [];
-
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-import { NextRequest } from 'next/server';
-import { Order, CartItem, PaymentMethod } from '@/lib/types';
 
 // Mock data for orders since there's no backend yet
 let mockOrders: Order[] = [
@@ -48,203 +38,86 @@ let mockOrders: Order[] = [
     status: 'pending',
     created_at: '2024-01-15T11:15:00Z',
     updated_at: '2024-01-15T11:15:00Z',
-    total_amount: 1299, // $12.99
+    total_amount: 1799, // $17.99
     items: [
       {
         id: 'item_003',
         clover_item_id: 'clv_789',
-        name: 'Green Tea',
+        name: 'Latte',
         quantity: 1,
-        unit_price: 599,
-        total_price: 599,
+        unit_price: 549,
+        total_price: 549,
       },
       {
         id: 'item_004',
         clover_item_id: 'clv_101',
         name: 'Muffin',
         quantity: 1,
-        unit_price: 700,
-        total_price: 700,
+        unit_price: 1250,
+        total_price: 1250,
       }
     ],
-  },
-  {
-    id: 'ord_003',
-    customer_name: 'Bob Wilson',
-    customer_email: 'bob@example.com',
-    status: 'fulfilled',
-    created_at: '2024-01-14T09:45:00Z',
-    updated_at: '2024-01-14T10:20:00Z',
-    total_amount: 3499, // $34.99
-    items: [
-      {
-        id: 'item_005',
-        clover_item_id: 'clv_112',
-        name: 'Sandwich',
-        quantity: 1,
-        unit_price: 1299,
-        total_price: 1299,
-      },
-      {
-        id: 'item_006',
-        clover_item_id: 'clv_113',
-        name: 'Soup',
-        quantity: 1,
-        unit_price: 899,
-        total_price: 899,
-      },
-      {
-        id: 'item_007',
-        clover_item_id: 'clv_114',
-        name: 'Side Salad',
-        quantity: 1,
-        unit_price: 699,
-        total_price: 699,
-      },
-      {
-        id: 'item_008',
-        clover_item_id: 'clv_115',
-        name: 'Drink',
-        quantity: 1,
-        unit_price: 602,
-        total_price: 602,
-      }
-    ],
-    notes: 'Lunch combo order',
-  },
-  {
-    id: 'ord_004',
-    customer_name: 'Alice Johnson',
-    customer_email: 'alice@example.com',
-    status: 'canceled',
-    created_at: '2024-01-13T14:20:00Z',
-    updated_at: '2024-01-13T14:25:00Z',
-    total_amount: 899, // $8.99
-    items: [
-      {
-        id: 'item_009',
-        clover_item_id: 'clv_116',
-        name: 'Espresso',
-        quantity: 2,
-        unit_price: 449,
-        total_price: 898,
-      }
-    ],
-    notes: 'Customer canceled due to wait time',
+    notes: null,
   }
 ];
 
-export async function GET(req: NextRequest) {
-  const { searchParams } = req.nextUrl;
-  const status = searchParams.get('status');
-  const customer = searchParams.get('customer');
-  const fromDate = searchParams.get('from_date');
-  const toDate = searchParams.get('to_date');
-
-  let filteredOrders = [...mockOrders];
-
-  // Filter by status
-  if (status && status !== 'all') {
-    filteredOrders = filteredOrders.filter(order => order.status === status);
-  }
-
-  // Filter by customer
-  if (customer) {
-    const searchTerm = customer.toLowerCase();
-    filteredOrders = filteredOrders.filter(order => 
-      order.customer_name?.toLowerCase().includes(searchTerm) ||
-      order.customer_email?.toLowerCase().includes(searchTerm)
-    );
-  }
-
-  // Filter by date range
-  if (fromDate) {
-    filteredOrders = filteredOrders.filter(order => 
-      new Date(order.created_at) >= new Date(fromDate)
-    );
-  }
-
-  if (toDate) {
-    filteredOrders = filteredOrders.filter(order => 
-      new Date(order.created_at) <= new Date(toDate + 'T23:59:59Z')
-    );
-  }
-
-  // Sort by created_at descending (newest first)
-  filteredOrders.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-
-  return Response.json(filteredOrders);
-}
-
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    const body = await req.json();
-    const { items, subtotal, tax, total, payment_method } = body as {
-      items: CartItem[];
-      subtotal: number;
-      tax: number;
-      total: number;
-      payment_method: PaymentMethod;
-    };
+    const body = await request.json();
+    const { items, subtotal, tax, total, payment_method } = body;
 
     // Validate required fields
-    if (!items || items.length === 0) {
-      return Response.json(
-        { error: 'Order must contain at least one item' },
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return NextResponse.json(
+        { error: 'Items are required' },
         { status: 400 }
       );
     }
 
-    if (!payment_method || !['card', 'cash', 'gift_card'].includes(payment_method)) {
-      return Response.json(
-        { error: 'Invalid payment method' },
+    if (!payment_method || !total) {
+      return NextResponse.json(
+        { error: 'Payment method and total are required' },
         { status: 400 }
       );
     }
+
+    // Generate new order ID
+    const orderId = `ord_${Date.now()}`;
+    
+    // Create order items
+    const orderItems = items.map((item: any, index: number) => ({
+      id: `item_${Date.now()}_${index}`,
+      clover_item_id: item.clover_item_id,
+      name: item.name,
+      quantity: item.quantity,
+      unit_price: item.price,
+      total_price: item.price * item.quantity,
+    }));
 
     // Create new order
     const newOrder: Order = {
-      id: `ord_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      customer_name: undefined, // POS orders typically don't have customer info
-      customer_email: undefined,
+      id: orderId,
+      customer_name: null,
+      customer_email: null,
       status: 'pending',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       total_amount: total,
-      items: items.map((item, index) => ({
-        id: `item_${Date.now()}_${index}`,
-        clover_item_id: item.clover_item_id,
-        name: item.name,
-        quantity: item.quantity,
-        unit_price: item.price,
-        total_price: item.price * item.quantity,
-      })),
+      items: orderItems,
+      notes: null,
     };
 
-    // Simulate processing delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Add to mock storage
+    mockOrders.push(newOrder);
 
-    // Simulate payment processing (in a real app, integrate with payment processor)
-    const paymentSuccess = Math.random() > 0.1; // 90% success rate for demo
+    return NextResponse.json({
+      success: true,
+      order: newOrder,
+      message: 'Order created successfully'
+    });
 
-    if (paymentSuccess) {
-      newOrder.status = 'paid';
-      newOrder.updated_at = new Date().toISOString();
-      mockOrders.push(newOrder);
-
-      return Response.json({
-        success: true,
-        order: newOrder,
-        message: 'Order processed successfully'
-      }, { status: 201 });
-    } else {
-      return Response.json(
-        { error: 'Payment processing failed. Please try again.' },
-        { status: 402 }
-      );
-    }
   } catch (error) {
-    console.error('Order processing error:', error);
+    console.error('Error creating order:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -256,8 +129,8 @@ export async function GET() {
   try {
     return NextResponse.json({
       success: true,
-      orders: orders.slice(-20), // Return last 20 orders
-      count: orders.length
+      orders: mockOrders.slice(-20), // Return last 20 orders
+      count: mockOrders.length
     });
   } catch (error) {
     console.error('Error fetching orders:', error);

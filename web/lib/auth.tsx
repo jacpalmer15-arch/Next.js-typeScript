@@ -59,7 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         redirectTo: `${window.location.origin}/`,
       },
     });
-    return { user: data.user, error };
+    return { user: null, error };
   };
 
   const signUp = async (email: string, password: string) => {
