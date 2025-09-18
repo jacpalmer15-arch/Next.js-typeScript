@@ -1,54 +1,52 @@
 import { NextRequest } from 'next/server';
+import { supabase } from '@/lib/supabaseClient';
 import { Product } from '@/lib/types';
-import { createBackendHeaders, validateAuthHeader, unauthorizedResponse } from '@/lib/auth-utils';
-
-const BASE = process.env.BACKEND_BASE!;
-
-
-function normalizeProducts(payload: unknown): Product[] {
-  const p = payload as Record<string, unknown>
-  const arr = Array.isArray(payload) ? payload
-    : Array.isArray(p?.products) ? p.products
-    : Array.isArray(p?.data) ? p.data
-    : Array.isArray(p?.items) ? p.items
-    : [];
-  // map price_cents -> price if needed
-  return arr.map((x: Record<string, unknown>): Product => ({
-    clover_item_id: String(x.clover_item_id ?? x.id ?? x.itemId ?? x.upc ?? ''),
-    name: String(x.name ?? x.title ?? 'Unnamed'),
-    category: x.category ? String(x.category) : x.category_name ? String(x.category_name) : null,
-    sku: x.sku ? String(x.sku) : null,
-    upc: x.upc ? String(x.upc) : null,
-    visible_in_kiosk: Boolean(x.visible_in_kiosk ?? x.kiosk ?? x.visible ?? false),
-    price: typeof x.price === 'number'
-      ? x.price
-      : typeof x.price_cents === 'number'
-      ? x.price_cents
-      : typeof x.priceInCents === 'number'
-      ? x.priceInCents
-      : null,
-  }));
-}
 
 export async function GET(req: NextRequest) {
-  // Validate authentication
-  if (!validateAuthHeader(req)) {
-    return unauthorizedResponse();
-  }
-
-  const qs = req.nextUrl.search;
-  const upstream = await fetch(`${BASE}/api/products${qs}`, { 
-    cache: 'no-store',
-    headers: createBackendHeaders(req)
-  });
-  const text = await upstream.text();
-  if (!upstream.ok) return new Response(text, { status: upstream.status });
-
-  // Try JSON → normalize → JSON out. If not JSON, return empty array.
   try {
-    const json = JSON.parse(text);
-    return Response.json(normalizeProducts(json));
-  } catch {
-    return Response.json([]);
+    const { searchParams } = req.nextUrl;
+    const search = searchParams.get('search');
+    const category = searchParams.get('category');
+    const kioskOnly = searchParams.get('kiosk_only') === 'true';
+
+    // Start building the query
+    let query = supabase.from('products').select('*');
+
+    // Apply filters based on search parameters
+    if (search) {
+      // Search across name, sku, and upc fields
+      query = query.or(`name.ilike.%${search}%,sku.ilike.%${search}%,upc.ilike.%${search}%`);
+    }
+
+    if (category) {
+      query = query.eq('category', category);
+    }
+
+    if (kioskOnly) {
+      query = query.eq('visible_in_kiosk', true);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Supabase error:', error);
+      return new Response(`Database error: ${error.message}`, { status: 500 });
+    }
+
+    // Transform data to match the expected Product type format
+    const products: Product[] = (data || []).map((row) => ({
+      clover_item_id: row.clover_item_id || '',
+      name: row.name || 'Unnamed',
+      category: row.category || null,
+      sku: row.sku || null,
+      upc: row.upc || null,
+      visible_in_kiosk: row.visible_in_kiosk || false,
+      price: row.price || null, // assuming price is stored directly in cents
+    }));
+
+    return Response.json(products);
+  } catch (err) {
+    console.error('Products API error:', err);
+    return new Response('Internal server error', { status: 500 });
   }
 }

@@ -42,6 +42,39 @@ The application includes a comprehensive products management system with:
 - Quick access to edit the full product via "Edit Product" button
 - Click outside the drawer or the X button to close
 
+## Environment Variables
+
+Before running the application, you need to set up the following environment variables:
+
+### Required Environment Variables
+
+Create a `.env.local` file in the root directory with:
+
+```env
+# Supabase Configuration
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+```
+
+- `NEXT_PUBLIC_SUPABASE_URL`: Your Supabase project URL (found in Project Settings > API)
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Your Supabase anon public key (found in Project Settings > API)
+
+### Database Schema
+
+The application expects a `products` table in Supabase with the following structure:
+
+```sql
+CREATE TABLE products (
+  clover_item_id TEXT PRIMARY KEY,
+  name TEXT,
+  category TEXT,
+  sku TEXT,
+  upc TEXT,
+  visible_in_kiosk BOOLEAN DEFAULT FALSE,
+  price INTEGER -- price in cents
+);
+```
+
 ## Getting Started
 
 ### Prerequisites
