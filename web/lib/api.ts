@@ -1,4 +1,3 @@
-
 import { 
   Product, 
   InventoryRow, 
@@ -70,6 +69,11 @@ export const api = {
   inventory: {
     all: () => request<InventoryRow[]>('/api/inventory'),
     lowStock: () => request<InventoryRow[]>('/api/inventory/low-stock'),
+    adjust: (adjustment: InventoryAdjustment) =>
+      request<InventoryAdjustmentResponse>('/api/inventory/adjust', {
+        method: 'POST',
+        body: JSON.stringify(adjustment),
+      }),
   },
   orders: {
     list: (opts?: { status?: OrderStatus; customer?: string; from_date?: string; to_date?: string }) =>

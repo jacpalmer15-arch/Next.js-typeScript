@@ -1,6 +1,5 @@
 const nextJest = require('next/jest')
 
-
 /** @type {import('jest').Config} */
 /* eslint-disable @typescript-eslint/no-require-imports */
 const nextJest = require('next/jest')
@@ -10,7 +9,6 @@ const createJestConfig = nextJest({
 })
 
 // Add any custom config to be passed to Jest
-
 const customJestConfig = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   testEnvironment: 'jsdom',
