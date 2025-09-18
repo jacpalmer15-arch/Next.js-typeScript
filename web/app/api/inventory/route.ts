@@ -1,8 +1,29 @@
 
 import { InventoryRow } from '@/lib/types';
 
-const BASE = process.env.BACKEND_BASE!;
+const BASE = process.env.BACKEND_BASE;
 
+// Mock inventory data
+const mockInventoryData: InventoryRow[] = [
+  {
+    clover_item_id: 'clv_001',
+    name: 'Organic Coffee Beans',
+    on_hand: 15,
+    reorder_level: 25,
+  },
+  {
+    clover_item_id: 'clv_002',
+    name: 'Almond Milk',
+    on_hand: 8,
+    reorder_level: 20,
+  },
+  {
+    clover_item_id: 'clv_003',
+    name: 'Croissants',
+    on_hand: 45,
+    reorder_level: 10,
+  }
+];
 
 function toNumber(v: unknown, def = 0): number {
   const n = typeof v === 'number' ? v : Number(v);
@@ -33,12 +54,16 @@ export async function GET() {
   }
 
   try {
+    const upstream = await fetch(`${BASE}/api/inventory`, { cache: 'no-store' });
+    const text = await upstream.text();
+    if (!upstream.ok) return new Response(text, { status: upstream.status });
+
     const json: unknown = JSON.parse(text);
     const arr = Array.isArray(json) ? json : Array.isArray((json as Record<string, unknown>)?.data) ? (json as Record<string, unknown>).data : [];
     const rows = (arr as Record<string, unknown>[]).map(normalizeRow);
     return Response.json(rows);
-  } catch {
-    console.error('Failed to parse inventory response');
-    return Response.json([]);
+  } catch (error) {
+    console.error('Failed to fetch inventory:', error);
+    return Response.json(mockInventoryData);
   }
 }

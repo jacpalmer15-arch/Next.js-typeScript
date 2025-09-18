@@ -1,5 +1,6 @@
 import './globals.css';
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import Providers from './providers';
 import { AdminLayout } from '@/components/admin-layout';
 import { Toaster } from "@/components/ui/sonner";
