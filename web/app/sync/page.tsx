@@ -145,6 +145,7 @@ export default function SyncSettingsPage() {
         qc.invalidateQueries({ queryKey: ['inventory-low'] });
       }
     } catch (e: unknown) {
+
       const errorMsg = (e as Error)?.name === 'AbortError' ? 'Canceled.' : String((e as Error)?.message || e);
       setSyncStatus(errorMsg);
       toast.error('Product sync failed');
@@ -253,6 +254,16 @@ export default function SyncSettingsPage() {
       </div>
     </main>
     <AdminLayout>
+      <div className="max-w-6xl">
+        <h1 className="text-xl font-semibold">Sync</h1>
+        <div className="mt-4 flex gap-3">
+          <button onClick={runProductSync} disabled={running}
+            className="rounded-md border px-3 py-2 text-sm hover:bg-gray-50 disabled:opacity-50">
+            {running ? 'Running…' : 'Run Product Sync'}
+          </button>
+        </div>
+        {status && <pre className="mt-4 whitespace-pre-wrap rounded border bg-gray-50 p-3 text-sm">{status}</pre>}
+
       <div className="max-w-6xl space-y-6">
         <h1 className="text-2xl font-semibold">Sync & Settings</h1>
 

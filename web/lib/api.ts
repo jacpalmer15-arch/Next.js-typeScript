@@ -36,11 +36,23 @@ async function getAuthHeaders() {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const headers = await getAuthHeaders();
+  // Get the current session for auth headers
+  const { data: { session } } = await supabase.auth.getSession();
   
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(init?.headers || {}),
+  };
+  
+  // Add authorization header if we have a session
+  if (session?.access_token) {
+    headers.Authorization = `Bearer ${session.access_token}`;
+  }
+
   const res = await fetch(path, {
     ...init,
-    headers: { ...headers, ...(init?.headers || {}) },
+    headers,
+
     cache: 'no-store',
   });
 

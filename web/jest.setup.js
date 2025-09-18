@@ -65,3 +65,10 @@ jest.mock('next-themes', () => ({
   ThemeProvider: ({ children }) => children,
 }))
 
+// Mock ResizeObserver
+global.ResizeObserver = class ResizeObserver {
+  constructor() {}
+  observe() { return null; }
+  disconnect() { return null; }
+  unobserve() { return null; }
+}

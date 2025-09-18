@@ -25,6 +25,7 @@ const navigation = [
   { name: 'Dashboard', href: '/', icon: Home },
   { name: 'Products', href: '/products', icon: Package },
   { name: 'Inventory', href: '/inventory', icon: Warehouse },
+  { name: 'Sync', href: '/sync', icon: RotateCcw },
   { name: 'Orders', href: '/orders', icon: ListOrdered },
   { name: 'Checkout', href: '/checkout', icon: ShoppingCart },
   { name: 'Sync & Settings', href: '/sync', icon: RotateCcw },
