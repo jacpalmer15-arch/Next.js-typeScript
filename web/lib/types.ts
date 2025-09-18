@@ -27,6 +27,8 @@ export type InventoryAdjustmentResponse = {
   success: boolean;
   new_quantity?: number;
   message?: string;
+};
+
 // Authentication Types
 export interface User {
   id: string;

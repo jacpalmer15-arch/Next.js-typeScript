@@ -1,6 +1,8 @@
 import { 
   Product, 
-  InventoryRow, 
+  InventoryRow,
+  InventoryAdjustment,
+  InventoryAdjustmentResponse,
   Order, 
   OrderStatus, 
   CartItem, 
@@ -20,19 +22,6 @@ function withQS(path: string, params?: Record<string, unknown>) {
   );
   const q = qs.toString();
   return q ? `${path}?${q}` : path;
-}
-
-async function getAuthHeaders() {
-  const { data: { session } } = await supabase.auth.getSession();
-  const headers: Record<string, string> = { 
-    'Content-Type': 'application/json'
-  };
-  
-  if (session?.access_token) {
-    headers['Authorization'] = `Bearer ${session.access_token}`;
-  }
-  
-  return headers;
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
@@ -104,35 +93,9 @@ export const api = {
       total: number;
       payment_method: PaymentMethod;
     }) =>
-      request<{ success: boolean; order: any; message: string }>('/api/orders', {
+      request<{ success: boolean; order: Order; message: string }>('/api/orders', {
         method: 'POST',
         body: JSON.stringify(orderData),
-      }),
-  },
-  clover: {
-    getConnection: () => request<CloverConnection>('/api/clover/connection'),
-    connect: (apiKey: string) =>
-      request<CloverConnection>('/api/clover/connect', {
-        method: 'POST',
-        body: JSON.stringify({ apiKey }),
-      }),
-    disconnect: () =>
-      request<{ success: boolean }>('/api/clover/disconnect', {
-        method: 'POST',
-      }),
-  },
-  settings: {
-    getFeatureFlags: () => request<FeatureFlags>('/api/settings/feature-flags'),
-    updateFeatureFlags: (flags: FeatureFlags) =>
-      request<FeatureFlags>('/api/settings/feature-flags', {
-        method: 'PUT',
-        body: JSON.stringify(flags),
-      }),
-    getMerchantProfile: () => request<MerchantProfile>('/api/settings/merchant-profile'),
-    updateMerchantProfile: (profile: MerchantProfile) =>
-      request<MerchantProfile>('/api/settings/merchant-profile', {
-        method: 'PUT',
-        body: JSON.stringify(profile),
       }),
   },
   sync: {
