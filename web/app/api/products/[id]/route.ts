@@ -1,8 +1,9 @@
 import { NextRequest } from 'next/server';
 const BASE = process.env.BACKEND_BASE!;
 
-export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
-  const upstream = await fetch(`${BASE}/api/products/${params.id}`, { cache: 'no-store' });
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const upstream = await fetch(`${BASE}/api/products/${id}`, { cache: 'no-store' });
   const text = await upstream.text();
   if (!upstream.ok) return new Response(text, { status: upstream.status });
 
@@ -27,7 +28,9 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   }
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+
+  const { id } = await params
   const body = await req.json().catch(() => ({}));
   const payload = {
     ...body,
@@ -35,7 +38,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     ...(body.price !== undefined ? { price_cents: Number(body.price) } : {}),
   };
 
-  const upstream = await fetch(`${BASE}/api/products/${params.id}`, {
+  const upstream = await fetch(`${BASE}/api/products/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),

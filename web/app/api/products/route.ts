@@ -1,21 +1,24 @@
 import { NextRequest } from 'next/server';
+import { Product } from '@/lib/types';
 
 const BASE = process.env.BACKEND_BASE!;
 
-function normalizeProducts(payload: any): any[] {
+
+function normalizeProducts(payload: unknown): Product[] {
+  const p = payload as Record<string, unknown>
   const arr = Array.isArray(payload) ? payload
-    : Array.isArray(payload?.products) ? payload.products
-    : Array.isArray(payload?.data) ? payload.data
-    : Array.isArray(payload?.items) ? payload.items
+    : Array.isArray(p?.products) ? p.products
+    : Array.isArray(p?.data) ? p.data
+    : Array.isArray(p?.items) ? p.items
     : [];
   // map price_cents -> price if needed
-  return arr.map((x: any) => ({
-    clover_item_id: x.clover_item_id ?? x.id ?? x.itemId ?? String(x.upc ?? ''),
-    name: x.name ?? x.title ?? 'Unnamed',
-    category: x.category ?? x.category_name ?? null,
-    sku: x.sku ?? null,
-    upc: x.upc ?? null,
-    visible_in_kiosk: x.visible_in_kiosk ?? x.kiosk ?? x.visible ?? false,
+  return arr.map((x: Record<string, unknown>): Product => ({
+    clover_item_id: String(x.clover_item_id ?? x.id ?? x.itemId ?? x.upc ?? ''),
+    name: String(x.name ?? x.title ?? 'Unnamed'),
+    category: x.category ? String(x.category) : x.category_name ? String(x.category_name) : null,
+    sku: x.sku ? String(x.sku) : null,
+    upc: x.upc ? String(x.upc) : null,
+    visible_in_kiosk: Boolean(x.visible_in_kiosk ?? x.kiosk ?? x.visible ?? false),
     price: typeof x.price === 'number'
       ? x.price
       : typeof x.price_cents === 'number'

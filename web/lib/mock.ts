@@ -39,8 +39,8 @@ export const mockProducts: Product[] = [
   },
 ];
 export const mockInventory: InventoryRow[] = [
-  { clover_item_id: 'itm_1001', name: 'Rule 1 Whey Blend - Chocolate', quantity: 12 },
-  { clover_item_id: 'itm_1002', name: 'After Dark VOiD Preworkout', quantity: 2, low_stock: true },
-  { clover_item_id: 'itm_1003', name: 'Zenith Shaker Bottle', quantity: 0, low_stock: true },
-  { clover_item_id: 'itm_1004', name: 'R1 Mass Gainer', quantity: 7 },
+  { clover_item_id: 'itm_1001', name: 'Rule 1 Whey Blend - Chocolate', on_hand: 12, reorder_level: 5 },
+  { clover_item_id: 'itm_1002', name: 'After Dark VOiD Preworkout', on_hand: 2, reorder_level: 5, low_stock: true },
+  { clover_item_id: 'itm_1003', name: 'Zenith Shaker Bottle', on_hand: 0, reorder_level: 3, low_stock: true },
+  { clover_item_id: 'itm_1004', name: 'R1 Mass Gainer', on_hand: 7, reorder_level: 2 },
 ];
