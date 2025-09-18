@@ -1,6 +1,6 @@
 import { Product, InventoryRow } from './types';
 
-function withQS(path: string, params?: Record<string, any>) {
+function withQS(path: string, params?: Record<string, unknown>) {
   if (!params) return path;
   const qs = new URLSearchParams(
     Object.entries(params)

@@ -2,6 +2,15 @@ import { NextRequest } from 'next/server';
 import { supabase } from '@/lib/supabaseClient';
 import { Product } from '@/lib/types';
 
+const BASE = process.env.BACKEND_BASE!;
+
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const upstream = await fetch(`${BASE}/api/products/${id}`, { cache: 'no-store' });
+  const text = await upstream.text();
+  if (!upstream.ok) return new Response(text, { status: upstream.status });
+  
+  
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
@@ -38,8 +47,9 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   }
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  try {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {    
+    
+      try {
     const { id } = await params;
     const body = await req.json().catch(() => ({}));
     
@@ -59,7 +69,15 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       .eq('clover_item_id', id)
       .select()
       .single();
+      
 
+      const upstream = await fetch(`${BASE}/api/products/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    cache: 'no-store',
+  });
+    
     if (error) {
       if (error.code === 'PGRST116') {
         return new Response('Product not found', { status: 404 });
