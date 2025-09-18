@@ -81,6 +81,11 @@ export const api = {
   inventory: {
     all: () => request<InventoryRow[]>('/api/inventory'),
     lowStock: () => request<InventoryRow[]>('/api/inventory/low-stock'),
+    adjust: (adjustment: InventoryAdjustment) =>
+      request<InventoryAdjustmentResponse>('/api/inventory/adjust', {
+        method: 'POST',
+        body: JSON.stringify(adjustment),
+      }),
   },
   orders: {
     list: (opts?: { status?: OrderStatus; customer?: string; from_date?: string; to_date?: string }) =>
@@ -91,6 +96,7 @@ export const api = {
         method: 'PATCH',
         body: JSON.stringify({ status }),
       }),
+    
     create: (orderData: {
       items: CartItem[];
       subtotal: number;
@@ -138,5 +144,31 @@ export const api = {
   },
   categories: {
     list: () => request<string[]>('/api/categories'),
+  },
+  clover: {
+    getConnection: () => request<CloverConnection>('/api/clover/connection'),
+    connect: (apiKey: string) =>
+      request<CloverConnection>('/api/clover/connect', {
+        method: 'POST',
+        body: JSON.stringify({ apiKey }),
+      }),
+    disconnect: () =>
+      request<{ success: boolean }>('/api/clover/disconnect', {
+        method: 'POST',
+      }),
+  },
+  settings: {
+    getFeatureFlags: () => request<FeatureFlags>('/api/settings/feature-flags'),
+    updateFeatureFlags: (flags: FeatureFlags) =>
+      request<FeatureFlags>('/api/settings/feature-flags', {
+        method: 'PUT',
+        body: JSON.stringify(flags),
+      }),
+    getMerchantProfile: () => request<MerchantProfile>('/api/settings/merchant-profile'),
+    updateMerchantProfile: (profile: MerchantProfile) =>
+      request<MerchantProfile>('/api/settings/merchant-profile', {
+        method: 'PUT',
+        body: JSON.stringify(profile),
+      }),
   },
 };

@@ -3,7 +3,8 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-import { InventoryRow } from '@/lib/auth-types';
+import { InventoryRow } from '@/lib/types';
+import { InventoryTable } from '@/components/inventory/inventory-table';
 import { AdminLayout } from '@/components/layout/AdminLayout';
 
 export default function InventoryPage() {
@@ -18,6 +19,47 @@ export default function InventoryPage() {
   });
 
   return (
+    <main className="mx-auto max-w-7xl p-6">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold">Inventory Management</h1>
+        <p className="text-gray-600 mt-2">
+          Monitor stock levels and adjust inventory quantities.
+        </p>
+      </div>
+
+      <section className="mb-8">
+        <div className="bg-white p-6 rounded-lg border">
+          <h2 className="text-xl font-semibold mb-4 text-red-700">Low Stock Items</h2>
+          {l2 && <p className="text-sm text-gray-500 mb-4">Loading low stock items...</p>}
+          {e2 && (
+            <div className="bg-red-50 border border-red-200 p-3 rounded mb-4">
+              <p className="text-sm text-red-600">{String(er2)}</p>
+            </div>
+          )}
+          <InventoryTable 
+            rows={Array.isArray(low) ? low : []} 
+            empty="No low-stock items. All inventory levels are sufficient!" 
+          />
+        </div>
+      </section>
+
+      <section>
+        <div className="bg-white p-6 rounded-lg border">
+          <h2 className="text-xl font-semibold mb-4">All Inventory</h2>
+          {l1 && <p className="text-sm text-gray-500 mb-4">Loading inventory...</p>}
+          {e1 && (
+            <div className="bg-red-50 border border-red-200 p-3 rounded mb-4">
+              <p className="text-sm text-red-600">{String(er1)}</p>
+            </div>
+          )}
+          <InventoryTable 
+            rows={Array.isArray(all) ? all : []} 
+            empty="No inventory items found."
+            showFilter={true}
+          />
+        </div>
+      </section>
+    </main>
     <AdminLayout>
       <div className="max-w-6xl">
         <h1 className="text-xl font-semibold">Inventory</h1>
@@ -37,33 +79,5 @@ export default function InventoryPage() {
         </section>
       </div>
     </AdminLayout>
-  );
-}
-
-function InventoryTable({ rows, empty }: { rows: InventoryRow[]; empty: string }) {
-  return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full text-left text-sm">
-        <thead className="border-b bg-gray-50">
-          <tr>
-            <th className="px-3 py-2">Name</th>
-            <th className="px-3 py-2">On Hand</th>
-            <th className="px-3 py-2">Reorder Level</th>
-            <th className="px-3 py-2">Clover Item</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => (
-            <tr key={r.clover_item_id} className="border-b">
-              <td className="px-3 py-2">{r.name ?? '-'}</td>
-              <td className="px-3 py-2">{r.on_hand}</td>
-              <td className="px-3 py-2">{r.reorder_level ?? '-'}</td>
-              <td className="px-3 py-2">{r.clover_item_id}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      {rows.length === 0 && <p className="mt-4 text-sm text-gray-500">{empty}</p>}
-    </div>
   );
 }

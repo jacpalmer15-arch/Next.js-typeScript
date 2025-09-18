@@ -1,6 +1,8 @@
+
 import { InventoryRow } from '@/lib/types';
 
 const BASE = process.env.BACKEND_BASE!;
+
 
 function toNumber(v: unknown, def = 0): number {
   const n = typeof v === 'number' ? v : Number(v);
@@ -25,9 +27,10 @@ function normalizeRow(x: Record<string, unknown>): InventoryRow {
 }
 
 export async function GET() {
-  const upstream = await fetch(`${BASE}/api/inventory`, { cache: 'no-store' });
-  const text = await upstream.text();
-  if (!upstream.ok) return new Response(text, { status: upstream.status });
+  // Return mock data if no backend base is configured
+  if (!BASE) {
+    return Response.json(mockInventoryData);
+  }
 
   try {
     const json: unknown = JSON.parse(text);

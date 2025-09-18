@@ -1,4 +1,5 @@
-import { InventoryRow } from '@/lib/types';
+import type { InventoryRow } from '@/lib/types';
+import { mockInventoryData } from '@/lib/mock-data';
 
 const BASE = process.env.BACKEND_BASE!;
 
@@ -13,6 +14,7 @@ function toNullableNumber(v: unknown): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
+
 function normalizeRow(x: Record<string, unknown>): InventoryRow {
   const on_hand = toNumber(x?.on_hand ?? x?.quantity ?? 0, 0);
   const reorder_level = toNullableNumber(x?.reorder_level ?? x?.min ?? null);
@@ -25,22 +27,40 @@ function normalizeRow(x: Record<string, unknown>): InventoryRow {
 }
 
 export async function GET() {
-  const upstream = await fetch(`${BASE}/api/inventory`, { cache: 'no-store' });
-  const text = await upstream.text();
-  if (!upstream.ok) return new Response(text, { status: upstream.status });
+  // Return mock data if no backend base is configured
+  if (!BASE) {
+    const lowStockItems = mockInventoryData.filter((item) => {
+      const reorderLevel = item.reorder_level ?? 0;
+      return item.on_hand <= reorderLevel;
+    });
+    return Response.json(lowStockItems.map(item => ({ ...item, low_stock: true })));
+  }
 
   try {
-    const json = JSON.parse(text);
-    const arr = Array.isArray(json) ? json : Array.isArray(json?.data) ? json.data : [];
-    const rows: InventoryRow[] = arr.map(normalizeRow);
+    const upstream = await fetch(`${BASE}/api/inventory`, { cache: 'no-store' });
+    const text = await upstream.text();
+    if (!upstream.ok) return new Response(text, { status: upstream.status });
 
-    const low = rows.filter((r) => {
-      const rl = r.reorder_level ?? 0;
-      return r.on_hand - rl <= 0;
-    });
+    try {
+      const json = JSON.parse(text);
+      const arr = Array.isArray(json) ? json : Array.isArray(json?.data) ? json.data : [];
+      const rows: InventoryRow[] = arr.map(normalizeRow);
 
-    return Response.json(low.map((r) => ({ ...r, low_stock: true })));
+      const low = rows.filter((r) => {
+        const rl = r.reorder_level ?? 0;
+        return r.on_hand - rl <= 0;
+      });
+
+      return Response.json(low.map((r) => ({ ...r, low_stock: true })));
+    } catch {
+      return Response.json([]);
+    }
   } catch {
-    return Response.json([]);
+    // Fallback to mock data if backend is not available
+    const lowStockItems = mockInventoryData.filter((item) => {
+      const reorderLevel = item.reorder_level ?? 0;
+      return item.on_hand <= reorderLevel;
+    });
+    return Response.json(lowStockItems.map(item => ({ ...item, low_stock: true })));
   }
 }
