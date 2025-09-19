@@ -49,22 +49,66 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     return <>{children}</>;
   }
 
-  // Show authenticated layout
+  // Show authenticated layout with universal header
   return (
-    <>
+    <div className="min-h-screen bg-gray-50">
+      {/* Universal Header */}
       <header className="border-b bg-white shadow-sm">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between p-4">
-          <div className="flex items-center gap-6 text-sm">
-            <Link href="/" className="font-semibold text-lg">Xeinth Admin</Link>
-            <Link href="/products" className="text-gray-600 hover:text-gray-900 transition-colors">
-              Products
+        <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+          <div className="flex items-center gap-8">
+            <Link href="/" className="font-semibold text-xl text-gray-900">
+              Zenith Admin
             </Link>
-            <Link href="/inventory" className="text-gray-600 hover:text-gray-900 transition-colors">
-              Inventory
-            </Link>
-            <Link href="/sync" className="text-gray-600 hover:text-gray-900 transition-colors">
-              Sync
-            </Link>
+            <div className="hidden md:flex items-center gap-6 text-sm">
+              <Link 
+                href="/" 
+                className={`text-gray-600 hover:text-gray-900 transition-colors ${
+                  pathname === '/' ? 'font-medium text-gray-900' : ''
+                }`}
+              >
+                Dashboard
+              </Link>
+              <Link 
+                href="/products" 
+                className={`text-gray-600 hover:text-gray-900 transition-colors ${
+                  pathname === '/products' ? 'font-medium text-gray-900' : ''
+                }`}
+              >
+                Products
+              </Link>
+              <Link 
+                href="/inventory" 
+                className={`text-gray-600 hover:text-gray-900 transition-colors ${
+                  pathname === '/inventory' ? 'font-medium text-gray-900' : ''
+                }`}
+              >
+                Inventory
+              </Link>
+              <Link 
+                href="/orders" 
+                className={`text-gray-600 hover:text-gray-900 transition-colors ${
+                  pathname === '/orders' ? 'font-medium text-gray-900' : ''
+                }`}
+              >
+                Orders
+              </Link>
+              <Link 
+                href="/checkout" 
+                className={`text-gray-600 hover:text-gray-900 transition-colors ${
+                  pathname === '/checkout' ? 'font-medium text-gray-900' : ''
+                }`}
+              >
+                Checkout
+              </Link>
+              <Link 
+                href="/sync" 
+                className={`text-gray-600 hover:text-gray-900 transition-colors ${
+                  pathname === '/sync' ? 'font-medium text-gray-900' : ''
+                }`}
+              >
+                Sync & Settings
+              </Link>
+            </div>
           </div>
           
           <div className="flex items-center gap-4">
@@ -84,7 +128,11 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           </div>
         </nav>
       </header>
-      {children}
-    </>
+
+      {/* Main Content */}
+      <main className="mx-auto max-w-7xl">
+        {children}
+      </main>
+    </div>
   );
 }

@@ -15,7 +15,8 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   
-  const { user, signInWithEmail, signInWithGoogle, signUp } = useAuth();
+  const { authState, signIn } = useAuth();
+  const { user } = authState;
   const router = useRouter();
 
   useEffect(() => {
@@ -31,14 +32,12 @@ export default function LoginPage() {
     setLoading(true);
     
     try {
-      const { user, error } = isSignUp 
-        ? await signUp(email, password)
-        : await signInWithEmail(email, password);
+      const { error } = await signIn(email, password);
         
       if (error) {
-        toast.error(error.message);
-      } else if (user) {
-        toast.success(isSignUp ? 'Account created successfully!' : 'Signed in successfully!');
+        toast.error(error);
+      } else {
+        toast.success('Signed in successfully!');
         router.push('/');
       }
     } catch {
@@ -49,19 +48,8 @@ export default function LoginPage() {
   };
 
   const handleGoogleAuth = async () => {
-    setLoading(true);
-    
-    try {
-      const { error } = await signInWithGoogle();
-      
-      if (error) {
-        toast.error(error.message);
-      }
-    } catch {
-      toast.error('Failed to sign in with Google');
-    } finally {
-      setLoading(false);
-    }
+    // Google auth not implemented yet
+    toast.error('Google authentication not available');
   };
 
   if (user) {
@@ -78,7 +66,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Xeinth Admin</CardTitle>
+          <CardTitle className="text-2xl">Zenith Admin</CardTitle>
           <CardDescription>
             {isSignUp ? 'Create your admin account' : 'Sign in to your admin account'}
           </CardDescription>

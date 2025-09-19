@@ -42,6 +42,7 @@ export async function GET(req: NextRequest) {
       upc: row.upc || null,
       visible_in_kiosk: row.visible_in_kiosk || false,
       price: row.price || null, // assuming price is stored directly in cents
+      cost: row.cost || null, // assuming cost is stored directly in cents
     }));
 
     return Response.json(products);

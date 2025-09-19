@@ -3,8 +3,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { api } from '@/lib/api';
-import { productColumns } from '@/components/products/columns';
-import { DataTable } from '@/components/products/data-table';
+import { productColumns } from '@/components/products/enhanced-columns';
+import { EnhancedDataTable } from '@/components/products/enhanced-data-table';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -32,10 +32,10 @@ export default function ProductsPage() {
   });
 
   return (
-    <main className="mx-auto max-w-6xl p-6">
-      <h1 className="text-xl font-semibold">Products</h1>
+    <div className="p-6">
+      <h1 className="text-xl font-semibold mb-6">Products</h1>
 
-      <div className="mt-4 grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-3 mb-6">
         <div>
           <Label htmlFor="search">Search</Label>
           <Input
@@ -71,19 +71,19 @@ export default function ProductsPage() {
         </label>
       </div>
 
-      <div className="mt-4 flex gap-3">
+      <div className="flex gap-3 mb-6">
         <button className="rounded-md border px-3 py-2 text-sm hover:bg-gray-50" onClick={() => refetch()}>
           Refresh
         </button>
       </div>
 
-      {isLoading && <p className="mt-6 text-sm text-gray-500">Loading…</p>}
-      {isError && <p className="mt-6 text-sm text-red-600">{(error as Error).message}</p>}
+      {isLoading && <p className="text-sm text-gray-500">Loading…</p>}
+      {isError && <p className="text-sm text-red-600">{(error as Error).message}</p>}
       {!isLoading && !isError && (
-        <div className="mt-6">
-          <DataTable columns={productColumns} data={data} />
+        <div>
+          <EnhancedDataTable columns={productColumns} data={data} />
         </div>
       )} 
-    </main>
+    </div>
   );
 }

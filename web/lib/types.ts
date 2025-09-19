@@ -7,6 +7,7 @@ export type Product = {
   upc?: string | null;
   visible_in_kiosk?: boolean;
   price?: number | null; // cents
+  cost?: number | null; // cents - cost of goods sold
 };
 
 export type InventoryRow = {

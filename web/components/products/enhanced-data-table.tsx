@@ -55,7 +55,7 @@ export function EnhancedDataTable<TData extends Product, TValue>({
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    initialState: { pagination: { pageIndex: 0, pageSize: 10 } },
+    initialState: { pagination: { pageIndex: 0, pageSize: 25 } },
   });
 
   const handleCloseDrawer = () => {
@@ -101,23 +101,52 @@ export function EnhancedDataTable<TData extends Product, TValue>({
         </div>
 
         <div className="flex items-center justify-between text-sm">
-          <div>
-            Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+          <div className="flex items-center gap-4">
+            <span>
+              Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+            </span>
+            <div className="flex items-center gap-2">
+              <label htmlFor="page-size" className="text-sm">Show:</label>
+              <select
+                id="page-size"
+                value={table.getState().pagination.pageSize}
+                onChange={(e) => table.setPageSize(Number(e.target.value))}
+                className="rounded border px-2 py-1 text-sm"
+              >
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+            </div>
           </div>
-          <div className="space-x-2">
+          <div className="flex items-center gap-2">
             <button
-              className="rounded border px-2 py-1 disabled:opacity-50"
+              className="rounded border px-3 py-1 disabled:opacity-50 text-sm"
+              onClick={() => table.setPageIndex(0)}
+              disabled={!table.getCanPreviousPage()}
+            >
+              First
+            </button>
+            <button
+              className="rounded border px-2 py-1 disabled:opacity-50 text-sm"
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
             >
               Prev
             </button>
             <button
-              className="rounded border px-2 py-1 disabled:opacity-50"
+              className="rounded border px-2 py-1 disabled:opacity-50 text-sm"
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
             >
               Next
+            </button>
+            <button
+              className="rounded border px-3 py-1 disabled:opacity-50 text-sm"
+              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+              disabled={!table.getCanNextPage()}
+            >
+              Last
             </button>
           </div>
         </div>

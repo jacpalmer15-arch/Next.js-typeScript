@@ -1,52 +1,57 @@
-import Link from 'next/link';
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AdminLayout } from "@/components/layout/AdminLayout";
+'use client';
+
+import { useAuth } from '@/lib/auth-context';
+import { User } from 'lucide-react';
 
 export default function Home() {
+  const { authState } = useAuth();
+  const { user } = authState;
+
   return (
-    <AdminLayout>
-      <div className="max-w-6xl">
-        <header className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-semibold">Dashboard</h1>
-          <div className="space-x-2">
-            <Button>New</Button>
-            <Button variant="outline">Sync</Button>
+    <div className="flex min-h-screen">
+      {/* Left Sidebar with Profile */}
+      <aside className="w-64 bg-white border-r border-gray-200 p-6">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
+            <User className="h-5 w-5 text-gray-600" />
           </div>
-        </header>
-        <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Link href="/products" className="block">
-            <Card className="hover:shadow-md transition-shadow">
-              <CardHeader><CardTitle>Products</CardTitle></CardHeader>
-              <CardContent>List, search, and toggle kiosk visibility.</CardContent>
-            </Card>
-          </Link>
-          <Link href="/inventory" className="block">
-            <Card className="hover:shadow-md transition-shadow">
-              <CardHeader><CardTitle>Inventory</CardTitle></CardHeader>
-              <CardContent>Stock levels and low-stock alerts.</CardContent>
-            </Card>
-          </Link>
-          <Link href="/orders" className="block">
-            <Card className="hover:shadow-md transition-shadow">
-              <CardHeader><CardTitle>Orders</CardTitle></CardHeader>
-              <CardContent>Manage orders and order status.</CardContent>
-            </Card>
-          </Link>
-          <Link href="/checkout" className="block">
-            <Card className="hover:shadow-md transition-shadow">
-              <CardHeader><CardTitle>Checkout</CardTitle></CardHeader>
-              <CardContent>Point of Sale system for processing orders.</CardContent>
-            </Card>
-          </Link>
-          <Link href="/sync" className="block">
-            <Card className="hover:shadow-md transition-shadow">
-              <CardHeader><CardTitle>Sync & Settings</CardTitle></CardHeader>
-              <CardContent>Run product / inventory syncs and manage settings.</CardContent>
-            </Card>
-          </Link>
-        </section>
+          <div>
+            <p className="text-sm font-medium text-gray-900">
+              {user?.email || 'Admin User'}
+            </p>
+            <p className="text-xs text-gray-500">Administrator</p>
+          </div>
+        </div>
+      </aside>
+
+      {/* Main Content Area */}
+      <div className="flex-1 p-6">
+        <div className="max-w-4xl">
+          <header className="mb-8">
+            <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
+            <p className="text-gray-600 mt-2">Welcome to Zenith Admin. Use the navigation above to manage your store.</p>
+          </header>
+          
+          {/* Dashboard content without the center cards */}
+          <div className="bg-white rounded-lg shadow-sm border p-6">
+            <h2 className="text-lg font-medium text-gray-900 mb-4">Quick Stats</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="text-center">
+                <p className="text-2xl font-semibold text-blue-600">-</p>
+                <p className="text-sm text-gray-500">Total Products</p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-semibold text-green-600">-</p>
+                <p className="text-sm text-gray-500">Low Stock Items</p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-semibold text-orange-600">-</p>
+                <p className="text-sm text-gray-500">Recent Orders</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    </AdminLayout>
+    </div>
   );
 }
