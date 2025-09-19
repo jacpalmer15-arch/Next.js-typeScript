@@ -1,13 +1,26 @@
-// Product Management Types
-export type Product = {
+// API response type
+export interface ApiProduct {
   clover_item_id: string;
   name: string;
-  category?: string | null;
-  sku?: string | null;
-  upc?: string | null;
-  visible_in_kiosk?: boolean;
-  price?: number | null; // cents
-  cost?: number | null; // cents - cost of goods sold
+  category_id: string | null;
+  sku: string | null;
+  upc: string | null;
+  price_cents: number | null;
+  cost_cents: number | null;
+  visible_in_kiosk: boolean;
+  // Add any other fields from your API response as needed
+}
+
+// UI-friendly type (optional, for table display)
+export type ProductTableRow = {
+  clover_item_id: string;
+  name: string;
+  category: string; // human-readable name, not id
+  sku: string | null;
+  upc: string | null;
+  visible_in_kiosk: boolean;
+  price: number | null; // dollars
+  cost: number | null;  // dollars
 };
 
 export type InventoryRow = {

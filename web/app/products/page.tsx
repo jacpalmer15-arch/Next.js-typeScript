@@ -3,25 +3,27 @@
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { api } from '@/lib/api';
-import { productColumns } from '@/components/products/enhanced-columns';
+import { productColumns } from '@/components/products/columns';
 import { EnhancedDataTable } from '@/components/products/enhanced-data-table';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+import type { ApiProduct, ProductTableRow } from '@/lib/types';
 
 export default function ProductsPage() {
   const [search, setSearch] = useState('');
   const [kioskOnly, setKioskOnly] = useState(false);
   const [category, setCategory] = useState<string>('all');
 
-  // Fetch categories from /api/categories
-  const { data: categories } = useQuery({
+  // Fetch categories
+  const { data: categories = [], isLoading: isCatLoading, isError: isCatError, error: catError } = useQuery({
     queryKey: ['categories'],
     queryFn: api.categories.list,
   });
 
-  // Fetch products (pass category id)
-  const { data = [], isLoading, isError, error, refetch } = useQuery({
+  // Fetch products as ApiProduct[]
+  const { data: rawProducts = [], isLoading, isError, error, refetch } = useQuery<ApiProduct[]>({
     queryKey: ['products', { search, kioskOnly, category }],
     queryFn: () =>
       api.products.list({
@@ -30,6 +32,18 @@ export default function ProductsPage() {
         category: category !== 'all' ? category : undefined,
       }),
   });
+
+  // Map API data to table row shape
+  const products: ProductTableRow[] = rawProducts.map((row) => ({
+    clover_item_id: row.clover_item_id,
+    name: row.name,
+    category: categories.find((cat: { id: string; name: string }) => cat.id === row.category_id)?.name ?? '—',
+    sku: row.sku,
+    upc: row.upc,
+    price: typeof row.price_cents === 'number' ? row.price_cents / 100 : null,
+    cost: typeof row.cost_cents === 'number' ? row.cost_cents / 100 : null,
+    visible_in_kiosk: row.visible_in_kiosk,
+  }));
 
   return (
     <div className="p-6">
@@ -54,7 +68,7 @@ export default function ProductsPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All</SelectItem>
-              {(categories ?? []).map((cat) => (
+              {categories.map((cat: { id: string; name: string }) => (
                 <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
               ))}
             </SelectContent>
@@ -79,11 +93,12 @@ export default function ProductsPage() {
 
       {isLoading && <p className="text-sm text-gray-500">Loading…</p>}
       {isError && <p className="text-sm text-red-600">{(error as Error).message}</p>}
+      {isCatError && <p className="text-sm text-red-600">{(catError as Error).message}</p>}
       {!isLoading && !isError && (
         <div>
-          <EnhancedDataTable columns={productColumns} data={data} />
+          <EnhancedDataTable columns={productColumns} data={products} />
         </div>
-      )} 
+      )}
     </div>
   );
 }

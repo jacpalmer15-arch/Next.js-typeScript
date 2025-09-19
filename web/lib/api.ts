@@ -1,5 +1,6 @@
 import { 
-  Product, 
+  ApiProduct,
+  ProductTableRow, 
   InventoryRow,
   InventoryAdjustment,
   InventoryAdjustmentResponse,
@@ -72,11 +73,12 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export const api = {
   products: {
+    // Now returns the true API shape!
     list: (opts?: { kiosk_only?: boolean; search?: string; category?: string }) =>
-      request<Product[]>(withQS('/api/products', opts)),
-    get: (id: string) => request<Product>(`/api/products/${id}`),
-    update: (id: string, patch: Partial<Product>) =>
-      request<Product>(`/api/products/${id}`, {
+      request<ApiProduct[]>(withQS('/api/products', opts)),
+    get: (id: string) => request<ApiProduct>(`/api/products/${id}`),
+    update: (id: string, patch: Partial<ApiProduct>) =>
+      request<ApiProduct>(`/api/products/${id}`, {
         method: 'PATCH',
         body: JSON.stringify(patch),
       }),

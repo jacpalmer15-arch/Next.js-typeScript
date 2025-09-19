@@ -2,13 +2,13 @@
 
 import { ColumnDef } from '@tanstack/react-table';
 import Link from 'next/link';
-import { Product } from '@/lib/types';
+import { ProductTableRow } from '@/lib/types';
 import { Switch } from '@/components/ui/switch';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
 
-function KioskToggle({ product }: { product: Product }) {
+function KioskToggle({ product }: { product: ProductTableRow }) {
   const qc = useQueryClient();
   const m = useMutation({
     mutationFn: (checked: boolean) =>
@@ -17,7 +17,6 @@ function KioskToggle({ product }: { product: Product }) {
       qc.invalidateQueries({ queryKey: ['products'] });
       toast.success('Updated');
     },
-
     onError: (e: Error) => toast.error(typeof e === 'string' ? e : 'Update failed'),
   });
 
@@ -30,7 +29,7 @@ function KioskToggle({ product }: { product: Product }) {
   );
 }
 
-export const productColumns: ColumnDef<Product>[] = [
+export const productColumns: ColumnDef<ProductTableRow>[] = [
   {
     accessorKey: 'name',
     header: 'Name',
@@ -46,6 +45,18 @@ export const productColumns: ColumnDef<Product>[] = [
   { accessorKey: 'category', header: 'Category' },
   { accessorKey: 'upc', header: 'UPC' },
   { accessorKey: 'sku', header: 'SKU' },
+  {
+    accessorKey: 'price',
+    header: 'Price',
+    cell: ({ row }) =>
+      row.original.price != null ? `$${row.original.price.toFixed(2)}` : '—',
+  },
+  {
+    accessorKey: 'cost',
+    header: 'Cost',
+    cell: ({ row }) =>
+      row.original.cost != null ? `$${row.original.cost.toFixed(2)}` : '—',
+  },
   {
     id: 'kiosk',
     header: 'Kiosk',
