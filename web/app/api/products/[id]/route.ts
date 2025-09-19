@@ -29,6 +29,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       upc: data.upc || null,
       visible_in_kiosk: data.visible_in_kiosk || false,
       price: data.price || null,
+      cost: data.cost || null,
     };
 
     return Response.json(product);
@@ -52,6 +53,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     if (body.upc !== undefined) updateData.upc = body.upc;
     if (body.visible_in_kiosk !== undefined) updateData.visible_in_kiosk = body.visible_in_kiosk;
     if (body.price !== undefined) updateData.price = Number(body.price);
+    if (body.cost !== undefined) updateData.cost = Number(body.cost);
 
     const { data, error } = await supabase
       .from('products')
@@ -77,6 +79,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       upc: data.upc || null,
       visible_in_kiosk: data.visible_in_kiosk || false,
       price: data.price || null,
+      cost: data.cost || null,
     };
 
     return Response.json(product);

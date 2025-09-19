@@ -48,13 +48,13 @@ function InlineEditCell({
     mutationFn: (newValue: string) => {
       let processedValue: string | number | null = newValue;
       
-      // Handle numeric fields
-      if (field === 'price' && newValue !== '') {
+      // Handle numeric fields (price and cost)
+      if ((field === 'price' || field === 'cost') && newValue !== '') {
         processedValue = Number(newValue);
       }
       
       // Handle empty strings as null for optional fields
-      if (newValue === '' && (field === 'category' || field === 'sku' || field === 'upc')) {
+      if (newValue === '' && (field === 'category' || field === 'sku' || field === 'upc' || field === 'price' || field === 'cost')) {
         processedValue = null;
       }
       
@@ -97,7 +97,8 @@ function InlineEditCell({
         onBlur={handleSave}
         onKeyDown={handleKeyDown}
         className="h-8 w-full"
-        type={field === 'price' ? 'number' : 'text'}
+        type={(field === 'price' || field === 'cost') ? 'number' : 'text'}
+        step={(field === 'price' || field === 'cost') ? '0.01' : undefined}
         autoFocus
         disabled={m.isPending}
       />
@@ -110,7 +111,7 @@ function InlineEditCell({
       onClick={() => setIsEditing(true)}
       title="Click to edit"
     >
-      {field === 'price' && value ? `$${(Number(value) / 100).toFixed(2)}` : value || '—'}
+      {(field === 'price' || field === 'cost') && value ? `$${(Number(value) / 100).toFixed(2)}` : value || '—'}
     </div>
   );
 }
@@ -171,6 +172,17 @@ export const enhancedProductColumns: ColumnDef<Product>[] = [
         product={row.original}
         field="price"
         value={row.original.price}
+      />
+    ),
+  },
+  {
+    accessorKey: 'cost',
+    header: 'Cost',
+    cell: ({ row }) => (
+      <InlineEditCell
+        product={row.original}
+        field="cost"
+        value={row.original.cost}
       />
     ),
   },
