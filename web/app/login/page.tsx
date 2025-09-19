@@ -66,7 +66,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Xeinth Admin</CardTitle>
+          <CardTitle className="text-2xl">Zenith Admin</CardTitle>
           <CardDescription>
             {isSignUp ? 'Create your admin account' : 'Sign in to your admin account'}
           </CardDescription>
