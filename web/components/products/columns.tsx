@@ -7,6 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
+import { formatCurrency } from '@/lib/utils';
 
 function KioskToggle({ product }: { product: ProductTableRow }) {
   const qc = useQueryClient();
@@ -49,13 +50,13 @@ export const productColumns: ColumnDef<ProductTableRow>[] = [
     accessorKey: 'price',
     header: 'Price',
     cell: ({ row }) =>
-      row.original.price != null ? `$${row.original.price.toFixed(2)}` : '—',
+      row.original.price != null ? formatCurrency(row.original.price * 100) : '—', // Convert back to cents for formatting
   },
   {
     accessorKey: 'cost',
     header: 'Cost',
     cell: ({ row }) =>
-      row.original.cost != null ? `$${row.original.cost.toFixed(2)}` : '—',
+      row.original.cost != null ? formatCurrency(row.original.cost * 100) : '—', // Convert back to cents for formatting
   },
   {
     id: 'kiosk',

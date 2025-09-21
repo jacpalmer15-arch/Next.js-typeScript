@@ -2,6 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
+import { formatCurrency } from '@/lib/utils';
 
 interface ProductDetailsDrawerProps {
   productId: string | null;
@@ -19,6 +20,18 @@ export function ProductDetailsDrawer({
     queryFn: () => (productId ? api.products.get(productId) : null),
     enabled: !!productId && isOpen,
   });
+
+  // Fetch categories to resolve category name from category_id
+  const { data: categories = [] } = useQuery({
+    queryKey: ['categories'],
+    queryFn: api.categories.list,
+    enabled: !!productId && isOpen,
+  });
+
+  // Find category name based on category_id
+  const categoryName = product?.category_id 
+    ? categories.find((cat: { id: string; name: string }) => cat.id === product.category_id)?.name || '—'
+    : '—';
 
   if (!isOpen) return null;
 
@@ -84,7 +97,7 @@ export function ProductDetailsDrawer({
                     Category
                   </label>
                   <div className="p-3 bg-gray-50 rounded border">
-                    {product.category || '—'}
+                    {categoryName}
                   </div>
                 </div>
                 
@@ -93,7 +106,7 @@ export function ProductDetailsDrawer({
                     Price
                   </label>
                   <div className="p-3 bg-gray-50 rounded border">
-                    {product.price ? `$${(product.price / 100).toFixed(2)}` : '—'}
+                    {product.price_cents ? formatCurrency(product.price_cents) : '—'}
                   </div>
                 </div>
               </div>

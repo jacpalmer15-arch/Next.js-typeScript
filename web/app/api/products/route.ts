@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { supabase } from '@/lib/supabaseClient';
-import { Product } from '@/lib/types';
+import { Product, ApiProduct } from '@/lib/types';
 
 export async function GET(req: NextRequest) {
   try {
@@ -33,16 +33,16 @@ export async function GET(req: NextRequest) {
       return new Response(`Database error: ${error.message}`, { status: 500 });
     }
 
-    // Transform data to match the expected Product type format
-    const products: Product[] = (data || []).map((row) => ({
+    // Transform data from database Product format to ApiProduct format
+    const products: ApiProduct[] = (data || []).map((row) => ({
       clover_item_id: row.clover_item_id || '',
       name: row.name || 'Unnamed',
-      category: row.category || null,
+      category_id: row.category || null, // Map category to category_id
       sku: row.sku || null,
       upc: row.upc || null,
       visible_in_kiosk: row.visible_in_kiosk || false,
-      price: row.price || null, // assuming price is stored directly in cents
-      cost: row.cost || null, // assuming cost is stored directly in cents
+      price_cents: row.price || null, // Map price to price_cents
+      cost_cents: row.cost || null, // Map cost to cost_cents
     }));
 
     return Response.json(products);
