@@ -11,6 +11,18 @@ export interface ApiProduct {
   // Add any other fields from your API response as needed
 }
 
+// Database/Backend Product type (what's stored in DB)
+export interface Product {
+  clover_item_id: string;
+  name: string;
+  category: string | null; // Note: DB stores category, not category_id
+  sku: string | null;
+  upc: string | null;
+  price: number | null; // Note: DB stores price in cents
+  cost: number | null; // Note: DB stores cost in cents
+  visible_in_kiosk: boolean;
+}
+
 // UI-friendly type (optional, for table display)
 export type ProductTableRow = {
   clover_item_id: string;

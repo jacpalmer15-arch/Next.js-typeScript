@@ -57,27 +57,30 @@ export default function ProductDetailPage() {
     if (data) {
       reset({
         name: data.name,
-        category: data.category ?? '',
+        category: data.category_id ?? '', // Use category_id
         sku: data.sku ?? '',
         upc: data.upc ?? '',
         visible_in_kiosk: !!data.visible_in_kiosk,
-        price: data.price ?? undefined,
+        price: data.price_cents ?? undefined, // Use price_cents
       });
     }
   }, [data, reset]);
 
   const m = useMutation({
     mutationFn: (values: FormData) => {
-      // Guard against NaN if the field was cleared
-      const clean: FormData = {
-        ...values,
-        price:
-
+      // Guard against NaN if the field was cleared and map to API field names
+      const apiPayload = {
+        name: values.name,
+        category_id: values.category || null, // Map category to category_id
+        sku: values.sku || null,
+        upc: values.upc || null,
+        visible_in_kiosk: values.visible_in_kiosk,
+        price_cents: 
           values.price === null || values.price === undefined || Number.isNaN(values.price as number)
-            ? undefined
+            ? null
             : values.price,
       };
-      return api.products.update(id, clean);
+      return api.products.update(id, apiPayload);
     },
     onSuccess: () => {
       toast.success('Saved');

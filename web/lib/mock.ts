@@ -9,6 +9,7 @@ export const mockProducts: Product[] = [
     sku: 'R1-WHEY-CHOC',
     visible_in_kiosk: true,
     price: 3999,
+    cost: 2400,
   },
   {
     clover_item_id: 'itm_1002',
@@ -18,6 +19,7 @@ export const mockProducts: Product[] = [
     sku: 'AD-VOID',
     visible_in_kiosk: true,
     price: 4499,
+    cost: 2700,
   },
   {
     clover_item_id: 'itm_1003',
@@ -27,6 +29,7 @@ export const mockProducts: Product[] = [
     sku: null,
     visible_in_kiosk: false,
     price: 1299,
+    cost: 650,
   },
   {
     clover_item_id: 'itm_1004',
@@ -36,6 +39,7 @@ export const mockProducts: Product[] = [
     sku: 'R1-GAIN',
     visible_in_kiosk: true,
     price: 5999,
+    cost: 3600,
   },
 ];
 export const mockInventory: InventoryRow[] = [
