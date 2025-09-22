@@ -94,7 +94,8 @@ export const api = {
   },
   orders: {
     list: (opts?: { status?: OrderStatus; customer?: string; from_date?: string; to_date?: string }) =>
-      request<Order[]>(withQS('/api/orders', opts)),
+      request<{ success: boolean; orders: Order[]; count: number }>(withQS('/api/orders', opts))
+        .then(data => data.orders ?? []),
     get: (id: string) => request<Order>(`/api/orders/${id}`),
     updateStatus: (id: string, status: OrderStatus) =>
       request<Order>(`/api/orders/${id}`, {

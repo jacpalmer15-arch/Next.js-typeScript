@@ -4,11 +4,11 @@ import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { api } from '@/lib/api';
 import { Order, OrderStatus } from '@/lib/types';
-import { DataTable } from '@/components/products/data-table';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { formatCurrency } from '@/lib/utils';
 
 export default function OrdersPage() {
   const [customerSearch, setCustomerSearch] = useState('');
@@ -177,7 +177,7 @@ export default function OrdersPage() {
                           </span>
                         </td>
                         <td className="py-3 font-mono">
-                          ${(order.total_amount / 100).toFixed(2)}
+                          {formatCurrency(order.total_amount)}
                         </td>
                         <td className="py-3 text-sm text-gray-600">
                           {new Date(order.created_at).toLocaleDateString()}

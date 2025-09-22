@@ -123,6 +123,17 @@ export function ProductDetailsDrawer({
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Cost
+                  </label>
+                  <div className="p-3 bg-gray-50 rounded border text-sm">
+                    {product.cost_cents ? formatCurrency(product.cost_cents) : '—'}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     UPC
                   </label>
                   <div className="p-3 bg-gray-50 rounded border text-sm">

@@ -31,8 +31,8 @@ export type ProductTableRow = {
   sku: string | null;
   upc: string | null;
   visible_in_kiosk: boolean;
-  price: number | null; // dollars
-  cost: number | null;  // dollars
+  price: number | null; // cents
+  cost: number | null;  // cents
 };
 
 export type InventoryRow = {
