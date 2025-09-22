@@ -40,8 +40,8 @@ export default function ProductsPage() {
     category: categories.find((cat: { id: string; name: string }) => cat.id === row.category_id)?.name ?? '—',
     sku: row.sku,
     upc: row.upc,
-    price: typeof row.price_cents === 'number' ? row.price_cents / 100 : null,
-    cost: typeof row.cost_cents === 'number' ? row.cost_cents / 100 : null,
+    price: typeof row.price_cents === 'number' ? row.price_cents : null,
+    cost: typeof row.cost_cents === 'number' ? row.cost_cents : null,
     visible_in_kiosk: row.visible_in_kiosk,
   }));
 

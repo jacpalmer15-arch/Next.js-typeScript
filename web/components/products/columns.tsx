@@ -50,13 +50,13 @@ export const productColumns: ColumnDef<ProductTableRow>[] = [
     accessorKey: 'price',
     header: 'Price',
     cell: ({ row }) =>
-      row.original.price != null ? formatCurrency(row.original.price * 100) : '—', // Convert back to cents for formatting
+      row.original.price != null ? formatCurrency(row.original.price) : '—',
   },
   {
     accessorKey: 'cost',
     header: 'Cost',
     cell: ({ row }) =>
-      row.original.cost != null ? formatCurrency(row.original.cost * 100) : '—', // Convert back to cents for formatting
+      row.original.cost != null ? formatCurrency(row.original.cost) : '—',
   },
   {
     id: 'kiosk',
