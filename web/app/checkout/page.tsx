@@ -19,7 +19,7 @@ export default function CheckoutPage() {
   // Add item to cart or increase quantity
   const addToCart = (productId: string) => {
     const product = mockProducts.find(p => p.clover_item_id === productId && p.visible_in_kiosk);
-    if (!product || !product.price) return;
+    if (!product || !product.price_cents) return;
 
     const existingItem = cart.find(item => item.clover_item_id === productId);
     
@@ -33,9 +33,9 @@ export default function CheckoutPage() {
       setCart([...cart, {
         clover_item_id: product.clover_item_id,
         name: product.name,
-        price: product.price,
+        price: product.price_cents,
         quantity: 1,
-        category: product.category,
+        category: product.category_id,
         sku: product.sku
       }]);
     }
@@ -112,7 +112,7 @@ export default function CheckoutPage() {
     }
   };
 
-  const availableProducts = mockProducts.filter(p => p.visible_in_kiosk && p.price);
+  const availableProducts = mockProducts.filter(p => p.visible_in_kiosk && p.price_cents);
 
   return (
     <AdminLayout>
@@ -144,7 +144,7 @@ export default function CheckoutPage() {
                     <div className="flex-1">
                       <h3 className="font-medium">{product.name}</h3>
                       <p className="text-sm text-gray-600">
-                        {product.category} • {formatCurrency(product.price!)}
+                        {product.category_id || 'No category'} • {formatCurrency(product.price_cents!)}
                       </p>
                       {product.sku && (
                         <p className="text-xs text-gray-500">SKU: {product.sku}</p>
