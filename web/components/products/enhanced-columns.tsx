@@ -2,7 +2,7 @@
 
 import { ColumnDef } from '@tanstack/react-table';
 import Link from 'next/link';
-import { Product } from '@/lib/types';
+import { Product, ProductTableRow } from '@/lib/types';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -10,7 +10,7 @@ import { api } from '@/lib/api';
 import { toast } from 'sonner';
 import { useState } from 'react';
 
-function KioskToggle({ product }: { product: Product }) {
+function KioskToggle({ product }: { product: ProductTableRow }) {
   const qc = useQueryClient();
   const m = useMutation({
     mutationFn: (checked: boolean) =>
@@ -36,8 +36,8 @@ function InlineEditCell({
   field, 
   value 
 }: { 
-  product: Product; 
-  field: keyof Product; 
+  product: ProductTableRow; 
+  field: keyof ProductTableRow; 
   value: string | number | null | undefined;
 }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -48,13 +48,13 @@ function InlineEditCell({
     mutationFn: (newValue: string) => {
       let processedValue: string | number | null = newValue;
       
-      // Handle numeric fields (price and cost)
-      if ((field === 'price' || field === 'cost') && newValue !== '') {
+      // Handle numeric fields (price_cents and cost_cents)
+      if ((field === 'price_cents' || field === 'cost_cents') && newValue !== '') {
         processedValue = Number(newValue);
       }
       
       // Handle empty strings as null for optional fields
-      if (newValue === '' && (field === 'category' || field === 'sku' || field === 'upc' || field === 'price' || field === 'cost')) {
+      if (newValue === '' && (field === 'category_id' || field === 'sku' || field === 'upc' || field === 'price_cents' || field === 'cost_cents')) {
         processedValue = null;
       }
       
@@ -97,8 +97,8 @@ function InlineEditCell({
         onBlur={handleSave}
         onKeyDown={handleKeyDown}
         className="h-8 w-full"
-        type={(field === 'price' || field === 'cost') ? 'number' : 'text'}
-        step={(field === 'price' || field === 'cost') ? '0.01' : undefined}
+        type={(field === 'price_cents' || field === 'cost_cents') ? 'number' : 'text'}
+        step={(field === 'price_cents' || field === 'cost_cents') ? '1' : undefined}
         autoFocus
         disabled={m.isPending}
       />
@@ -111,12 +111,12 @@ function InlineEditCell({
       onClick={() => setIsEditing(true)}
       title="Click to edit"
     >
-      {(field === 'price' || field === 'cost') && value ? `$${(Number(value) / 100).toFixed(2)}` : value || '—'}
+      {(field === 'price_cents' || field === 'cost_cents') && value ? `$${(Number(value) / 100).toFixed(2)}` : value || '—'}
     </div>
   );
 }
 
-export const enhancedProductColumns: ColumnDef<Product>[] = [
+export const enhancedProductColumns: ColumnDef<ProductTableRow>[] = [
   {
     accessorKey: 'name',
     header: 'Name',
@@ -165,24 +165,24 @@ export const enhancedProductColumns: ColumnDef<Product>[] = [
     ),
   },
   {
-    accessorKey: 'price',
+    accessorKey: 'price_cents',
     header: 'Price',
     cell: ({ row }) => (
       <InlineEditCell
         product={row.original}
-        field="price"
-        value={row.original.price}
+        field="price_cents"
+        value={row.original.price_cents}
       />
     ),
   },
   {
-    accessorKey: 'cost',
+    accessorKey: 'cost_cents',
     header: 'Cost',
     cell: ({ row }) => (
       <InlineEditCell
         product={row.original}
-        field="cost"
-        value={row.original.cost}
+        field="cost_cents"
+        value={row.original.cost_cents}
       />
     ),
   },
