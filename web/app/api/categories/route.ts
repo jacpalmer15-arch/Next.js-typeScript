@@ -11,13 +11,12 @@ export async function GET(req: NextRequest) {
     headers: createBackendHeaders(req),
   });
   const text = await res.text();
-  if (!res.ok) return Response.json([]); // Always return an array
+  if (!res.ok) return Response.json([]);
 
   try {
-    const categories = JSON.parse(text);
-    if (!Array.isArray(categories)) {
-      return Response.json([]); // Defensive: always return an array
-    }
+    const parsed = JSON.parse(text);
+    // Defensive: always return an array
+    const categories = Array.isArray(parsed.data) ? parsed.data : [];
     return Response.json(categories);
   } catch {
     return Response.json([]);

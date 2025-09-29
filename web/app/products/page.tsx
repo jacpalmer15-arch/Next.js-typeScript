@@ -37,11 +37,12 @@ export default function ProductsPage() {
   const products: ProductTableRow[] = rawProducts.map((row) => ({
     clover_item_id: row.clover_item_id,
     name: row.name,
-    category: categories.find((cat: { id: string; name: string }) => cat.id === row.category_id)?.name ?? '—',
+    category_id: row.category_id,
+    category: categories.find((cat: { id: string; name: string }) => cat.id === row.category_id)?.name ?? '—', // <-- Use category for display name
     sku: row.sku,
     upc: row.upc,
-    price: typeof row.price_cents === 'number' ? row.price_cents : null,
-    cost: typeof row.cost_cents === 'number' ? row.cost_cents : null,
+    price_cents: typeof row.price_cents === 'number' ? row.price_cents : null,
+    cost_cents: typeof row.cost_cents === 'number' ? row.cost_cents : null,
     visible_in_kiosk: row.visible_in_kiosk,
   }));
 

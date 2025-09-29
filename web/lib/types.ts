@@ -15,11 +15,11 @@ export interface ApiProduct {
 export interface Product {
   clover_item_id: string;
   name: string;
-  category: string | null; // Note: DB stores category, not category_id
+  category_id: string | null; // Note: DB stores category, not category_id
   sku: string | null;
   upc: string | null;
-  price: number | null; // Note: DB stores price in cents
-  cost: number | null; // Note: DB stores cost in cents
+  price_cents: number | null; // Note: DB stores price in cents
+  cost_cents: number | null; // Note: DB stores cost in cents
   visible_in_kiosk: boolean;
 }
 
@@ -27,12 +27,13 @@ export interface Product {
 export type ProductTableRow = {
   clover_item_id: string;
   name: string;
-  category: string; // human-readable name, not id
+  category_id: string | null; // <-- Required
+  category: string;           // Display name
   sku: string | null;
   upc: string | null;
   visible_in_kiosk: boolean;
-  price: number | null; // cents
-  cost: number | null;  // cents
+  price_cents: number | null;
+  cost_cents: number | null;
 };
 
 export type InventoryRow = {

@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
     }
 
     if (category) {
-      query = query.eq('category', category);
+      query = query.eq('category_id', category); 
     }
 
     if (kioskOnly) {
@@ -37,12 +37,12 @@ export async function GET(req: NextRequest) {
     const products: ApiProduct[] = (data || []).map((row) => ({
       clover_item_id: row.clover_item_id || '',
       name: row.name || 'Unnamed',
-      category_id: row.category || null, // Map category to category_id
+      category_id: row.category_id || null, // Map category to category_id
       sku: row.sku || null,
       upc: row.upc || null,
       visible_in_kiosk: row.visible_in_kiosk || false,
-      price_cents: row.price || null, // Map price to price_cents
-      cost_cents: row.cost || null, // Map cost to cost_cents
+      price_cents: row.price_cents || null, // Map price to price_cents
+      cost_cents: row.cost_cents || null, // Map cost to cost_cents
     }));
 
     return Response.json(products);
