@@ -12,7 +12,7 @@ import {
 } from '@tanstack/react-table';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Product } from '@/lib/types';
-import { ProductDetailsDrawer } from './details-drawer';
+import { ProductDetailsModal } from './details-modal';
 import { Eye } from 'lucide-react';
 
 export function EnhancedDataTable<TData extends Product, TValue>({
@@ -24,7 +24,7 @@ export function EnhancedDataTable<TData extends Product, TValue>({
 }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [selectedProductId, setSelectedProductId] = React.useState<string | null>(null);
-  const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
 
   // Add a details column
   const columnsWithDetails: ColumnDef<TData, TValue>[] = [
@@ -36,7 +36,7 @@ export function EnhancedDataTable<TData extends Product, TValue>({
         <button
           onClick={() => {
             setSelectedProductId(row.original.clover_item_id);
-            setIsDrawerOpen(true);
+            setIsModalOpen(true);
           }}
           className="p-1 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
           title="View details"
@@ -58,8 +58,8 @@ export function EnhancedDataTable<TData extends Product, TValue>({
     initialState: { pagination: { pageIndex: 0, pageSize: 25 } },
   });
 
-  const handleCloseDrawer = () => {
-    setIsDrawerOpen(false);
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
     setSelectedProductId(null);
   };
 
@@ -152,10 +152,10 @@ export function EnhancedDataTable<TData extends Product, TValue>({
         </div>
       </div>
 
-      <ProductDetailsDrawer
+      <ProductDetailsModal
         productId={selectedProductId}
-        isOpen={isDrawerOpen}
-        onClose={handleCloseDrawer}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
       />
     </>
   );
