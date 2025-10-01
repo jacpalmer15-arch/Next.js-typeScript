@@ -1,17 +1,19 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AdminLayout } from '@/components/layout/AdminLayout';
 import { PaymentMethod } from '@/lib/types';
 import { Minus, Plus, Trash2, CreditCard, Banknote, Gift, ShoppingCart } from 'lucide-react';
 import { toast } from "sonner";
 import { formatCurrency } from '@/lib/utils';
 import { useCart } from '@/lib/cart-context';
+import { api } from '@/lib/api';
 
 export default function CheckoutPage() {
   const [isProcessing, setIsProcessing] = useState(false);
+  const router = useRouter();
   
   const {
     cart,
@@ -35,6 +37,9 @@ export default function CheckoutPage() {
     setIsProcessing(true);
     
     try {
+      // TODO: Integrate with Clover Mini for payment capture
+      // This will handle the actual payment processing with the Clover device
+      
       // Create order via API
       const orderData = {
         items: cart,
@@ -44,21 +49,18 @@ export default function CheckoutPage() {
         payment_method: paymentMethod,
       };
 
-      const response = await fetch('/api/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderData)
-      });
+      const result = await api.orders.create(orderData);
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || 'Payment processing failed');
+      if (!result.success || !result.order) {
+        throw new Error('Failed to create order');
       }
 
       toast.success(`${result.message} - Total: ${formatCurrency(total)}`);
       clearCart();
       setPaymentMethod('card');
+      
+      // Redirect to order detail page
+      router.push(`/orders/${result.order.id}`);
     } catch (error) {
       console.error('Checkout error:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to process order. Please try again.');
@@ -68,7 +70,7 @@ export default function CheckoutPage() {
   };
 
   return (
-    <AdminLayout>
+    <div className="p-6">
       <div className="min-h-screen bg-gray-50">
         {/* Header */}
         <header className="bg-white border-b shadow-sm px-6 py-4">
@@ -236,6 +238,6 @@ export default function CheckoutPage() {
           )}
         </div>
       </div>
-    </AdminLayout>
+    </div>
   );
 }

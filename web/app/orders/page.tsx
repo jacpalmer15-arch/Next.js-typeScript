@@ -183,13 +183,22 @@ export default function OrdersPage() {
                           {new Date(order.created_at).toLocaleDateString()}
                         </td>
                         <td className="py-3">
-                          <Button
-                            onClick={() => handleViewDetails(order)}
-                            variant="outline"
-                            size="sm"
-                          >
-                            View Details
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button
+                              onClick={() => handleViewDetails(order)}
+                              variant="outline"
+                              size="sm"
+                            >
+                              View Details
+                            </Button>
+                            <Button
+                              onClick={() => window.location.href = `/orders/${order.id}`}
+                              variant="default"
+                              size="sm"
+                            >
+                              Review
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     ))}

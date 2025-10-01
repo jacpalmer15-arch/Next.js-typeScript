@@ -1,14 +1,13 @@
 'use client'
 
-import { createContext, useContext, useState, ReactNode } from 'react'
-import { CartItem, PaymentMethod } from '@/lib/types'
-import { mockProducts } from '@/lib/mock'
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { CartItem, PaymentMethod, ApiProduct } from '@/lib/types'
 
 interface CartContextType {
   cart: CartItem[]
   paymentMethod: PaymentMethod
   isCartOpen: boolean
-  addToCart: (productId: string) => void
+  addToCart: (productId: string, product?: ApiProduct) => void
   updateQuantity: (productId: string, newQuantity: number) => void
   removeFromCart: (productId: string) => void
   clearCart: () => void
@@ -34,14 +33,53 @@ interface CartProviderProps {
   children: ReactNode
 }
 
+// Load cart from localStorage
+function loadCartFromStorage(): CartItem[] {
+  if (typeof window === 'undefined') return []
+  try {
+    const stored = localStorage.getItem('zenith-cart')
+    return stored ? JSON.parse(stored) : []
+  } catch {
+    return []
+  }
+}
+
+// Save cart to localStorage
+function saveCartToStorage(cart: CartItem[]) {
+  if (typeof window === 'undefined') return
+  try {
+    localStorage.setItem('zenith-cart', JSON.stringify(cart))
+  } catch (error) {
+    console.error('Failed to save cart to localStorage:', error)
+  }
+}
+
 export function CartProvider({ children }: CartProviderProps) {
   const [cart, setCart] = useState<CartItem[]>([])
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card')
   const [isCartOpen, setIsCartOpen] = useState(false)
+  const [isHydrated, setIsHydrated] = useState(false)
 
-  const addToCart = (productId: string) => {
-    const product = mockProducts.find(p => p.clover_item_id === productId && p.visible_in_kiosk)
-    if (!product || !product.price_cents) return
+  // Load cart from localStorage on mount
+  useEffect(() => {
+    setCart(loadCartFromStorage())
+    setIsHydrated(true)
+  }, [])
+
+  // Save cart to localStorage whenever it changes
+  useEffect(() => {
+    if (isHydrated) {
+      saveCartToStorage(cart)
+    }
+  }, [cart, isHydrated])
+
+  const addToCart = (productId: string, product?: ApiProduct) => {
+    if (!product) {
+      console.error('Product data is required to add to cart')
+      return
+    }
+    
+    if (!product.price_cents) return
 
     const existingItem = cart.find(item => item.clover_item_id === productId)
     
