@@ -285,17 +285,20 @@ export function ProductDetailsModal({
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="category_id">Category</Label>
-                  <Select value={watch('category_id') || ''} onValueChange={(value) => setValue('category_id', value || null, { shouldDirty: true })}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">None</SelectItem>
-                      {categories.map((cat: { id: string; name: string }) => (
-                        <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    <Select
+                      value={watch('category_id') ?? "__none__"}
+                      onValueChange={value => setValue('category_id', value === "__none__" ? null : value, { shouldDirty: true })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__none__">None</SelectItem>
+                        {categories.map((cat: { id: string; name: string }) => (
+                          <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                 </div>
                 <div>
                   <Label htmlFor="price_cents">Price (cents)</Label>
