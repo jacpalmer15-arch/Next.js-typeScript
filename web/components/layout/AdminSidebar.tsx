@@ -13,7 +13,8 @@ import {
   Menu,
   X,
   ShoppingCart,
-  ListOrdered
+  ListOrdered,
+  Store
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -25,8 +26,8 @@ const navigation = [
   { name: 'Dashboard', href: '/', icon: Home },
   { name: 'Products', href: '/products', icon: Package },
   { name: 'Inventory', href: '/inventory', icon: Warehouse },
-  { name: 'Sync', href: '/sync', icon: RotateCcw },
   { name: 'Orders', href: '/orders', icon: ListOrdered },
+  { name: 'Store', href: '/store', icon: Store },
   { name: 'Checkout', href: '/checkout', icon: ShoppingCart },
   { name: 'Sync & Settings', href: '/sync', icon: RotateCcw },
 ]
