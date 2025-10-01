@@ -1,13 +1,16 @@
 'use client';
 
 import { Button } from "@/components/ui/button";
-import { AdminLayout } from '@/components/layout/AdminLayout';
-import { mockProducts } from '@/lib/mock';
 import { Plus, Minus, Trash2, ShoppingCart, X } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { useCart } from '@/lib/cart-context';
+import { useQuery } from '@tanstack/react-query';
+import { api } from '@/lib/api';
+import { ApiProduct } from '@/lib/types';
+import { useRouter } from 'next/navigation';
 
 export default function StorePage() {
+  const router = useRouter();
   const {
     cart,
     isCartOpen,
@@ -22,10 +25,16 @@ export default function StorePage() {
     cartItemCount,
   } = useCart();
 
-  const availableProducts = mockProducts.filter(p => p.visible_in_kiosk && p.price_cents);
+  // Fetch live products from API
+  const { data: products = [], isLoading, isError } = useQuery<ApiProduct[]>({
+    queryKey: ['products', { kiosk_only: true }],
+    queryFn: () => api.products.list({ kiosk_only: true }),
+  });
+
+  const availableProducts = products.filter(p => p.visible_in_kiosk && p.price_cents);
 
   return (
-    <AdminLayout>
+    <div className="p-6">
       <div className="relative min-h-screen">
         {/* Header with Cart Toggle */}
         <header className="sticky top-0 z-10 bg-white border-b shadow-sm px-6 py-4 flex items-center justify-between">
@@ -46,13 +55,31 @@ export default function StorePage() {
           </Button>
         </header>
 
+        {/* Loading State */}
+        {isLoading && (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading products...</p>
+            </div>
+          </div>
+        )}
+
+        {/* Error State */}
+        {isError && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+            <p className="text-red-600">Failed to load products. Please try again.</p>
+          </div>
+        )}
+
         {/* Product Grid */}
-        <div className="p-6 pb-24">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-            {availableProducts.map((product) => (
+        {!isLoading && !isError && (
+          <div className="p-6 pb-24">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+              {availableProducts.map((product) => (
               <div
                 key={product.clover_item_id}
-                onClick={() => addToCart(product.clover_item_id)}
+                onClick={() => addToCart(product.clover_item_id, product)}
                 className="group relative bg-white border-2 border-gray-200 rounded-2xl p-4 cursor-pointer transition-all duration-200 hover:border-blue-500 hover:shadow-lg active:scale-95"
               >
                 {/* Product Image Placeholder */}
@@ -76,9 +103,10 @@ export default function StorePage() {
                   <Plus className="h-4 w-4" />
                 </div>
               </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Sliding Cart Sidebar */}
         <div
@@ -206,10 +234,7 @@ export default function StorePage() {
                   <Button
                     className="w-full h-12 text-base font-semibold rounded-xl"
                     size="lg"
-                    onClick={() => {
-                      // Navigate to checkout page
-                      window.location.href = '/checkout';
-                    }}
+                    onClick={() => router.push('/checkout')}
                   >
                     Proceed to Checkout - {formatCurrency(total)}
                   </Button>
@@ -219,14 +244,14 @@ export default function StorePage() {
           </div>
         </div>
 
-        {/* Overlay */}
+        {/* Overlay - lighter opacity for better UX */}
         {isCartOpen && (
           <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity"
+            className="fixed inset-0 bg-black/30 z-40 transition-opacity"
             onClick={() => setIsCartOpen(false)}
           />
         )}
       </div>
-    </AdminLayout>
+    </div>
   );
 }

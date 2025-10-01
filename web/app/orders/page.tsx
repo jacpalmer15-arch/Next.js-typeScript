@@ -2,6 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { Order, OrderStatus } from '@/lib/types';
 import { Input } from '@/components/ui/input';
@@ -11,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/lib/utils';
 
 export default function OrdersPage() {
+  const router = useRouter();
   const [customerSearch, setCustomerSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [fromDate, setFromDate] = useState('');
@@ -183,13 +185,22 @@ export default function OrdersPage() {
                           {new Date(order.created_at).toLocaleDateString()}
                         </td>
                         <td className="py-3">
-                          <Button
-                            onClick={() => handleViewDetails(order)}
-                            variant="outline"
-                            size="sm"
-                          >
-                            View Details
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button
+                              onClick={() => handleViewDetails(order)}
+                              variant="outline"
+                              size="sm"
+                            >
+                              View Details
+                            </Button>
+                            <Button
+                              onClick={() => router.push(`/orders/${order.id}`)}
+                              variant="default"
+                              size="sm"
+                            >
+                              Review
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     ))}
