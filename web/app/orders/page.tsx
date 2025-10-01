@@ -2,6 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { Order, OrderStatus } from '@/lib/types';
 import { Input } from '@/components/ui/input';
@@ -11,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/lib/utils';
 
 export default function OrdersPage() {
+  const router = useRouter();
   const [customerSearch, setCustomerSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [fromDate, setFromDate] = useState('');
@@ -192,7 +194,7 @@ export default function OrdersPage() {
                               View Details
                             </Button>
                             <Button
-                              onClick={() => window.location.href = `/orders/${order.id}`}
+                              onClick={() => router.push(`/orders/${order.id}`)}
                               variant="default"
                               size="sm"
                             >

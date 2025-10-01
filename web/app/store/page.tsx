@@ -7,8 +7,10 @@ import { useCart } from '@/lib/cart-context';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { ApiProduct } from '@/lib/types';
+import { useRouter } from 'next/navigation';
 
 export default function StorePage() {
+  const router = useRouter();
   const {
     cart,
     isCartOpen,
@@ -232,10 +234,7 @@ export default function StorePage() {
                   <Button
                     className="w-full h-12 text-base font-semibold rounded-xl"
                     size="lg"
-                    onClick={() => {
-                      // Navigate to checkout page
-                      window.location.href = '/checkout';
-                    }}
+                    onClick={() => router.push('/checkout')}
                   >
                     Proceed to Checkout - {formatCurrency(total)}
                   </Button>
@@ -245,10 +244,10 @@ export default function StorePage() {
           </div>
         </div>
 
-        {/* Overlay */}
+        {/* Overlay - lighter opacity for better UX */}
         {isCartOpen && (
           <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity"
+            className="fixed inset-0 bg-black/30 z-40 transition-opacity"
             onClick={() => setIsCartOpen(false)}
           />
         )}

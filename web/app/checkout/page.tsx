@@ -85,7 +85,7 @@ export default function CheckoutPage() {
               <h2 className="text-2xl font-semibold text-gray-800 mb-2">Your cart is empty</h2>
               <p className="text-gray-600 mb-6">Add some products from the store to get started</p>
               <Button
-                onClick={() => window.location.href = '/store'}
+                onClick={() => router.push('/store')}
                 size="lg"
               >
                 Go to Store
