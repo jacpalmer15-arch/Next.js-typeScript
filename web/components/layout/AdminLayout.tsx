@@ -1,3 +1,8 @@
+/**
+ * @deprecated This component is deprecated. Use @/components/admin-layout instead.
+ * This file is kept for backward compatibility but is no longer used in the application.
+ * The unified layout is now in components/admin-layout.tsx
+ */
 'use client'
 
 import { ReactNode } from 'react'
