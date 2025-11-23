@@ -1,3 +1,8 @@
+/**
+ * @deprecated This component is deprecated and no longer used in the application.
+ * The unified layout in components/admin-layout.tsx uses AdminSidebar which includes
+ * user info and sign out functionality.
+ */
 'use client'
 
 import { useAuth } from '@/lib/auth-context'
