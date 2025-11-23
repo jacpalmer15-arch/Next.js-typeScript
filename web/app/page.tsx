@@ -6,7 +6,7 @@ export default function Home() {
       <div className="max-w-4xl">
         <header className="mb-8">
           <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600 mt-2">Welcome to Zenith Admin. Use the navigation to manage your store.</p>
+          <p className="text-gray-600 mt-2">Welcome to Zenith Admin. Use the sidebar navigation to manage your store.</p>
         </header>
         
         {/* Dashboard content */}
