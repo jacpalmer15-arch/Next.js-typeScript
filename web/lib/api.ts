@@ -105,15 +105,33 @@ export const api = {
     
     create: (orderData: {
       items: CartItem[];
-      subtotal: number;
-      tax: number;
-      total: number;
-      payment_method: PaymentMethod;
-    }) =>
-      request<{ success: boolean; order: Order; message: string }>('/api/orders', {
+      subtotal?: number;
+      tax?: number;
+      total?: number;
+      payment_method?: PaymentMethod;
+    }) => {
+      // Transform UI cart into upstream orderCart.lineItems shape
+      // Each quantity unit becomes a separate lineItem with the same clover_item_id
+      function sanitizeQuantity(quantity: number): number {
+        return Math.max(0, Number(quantity) || 0);
+      }
+      
+      const lineItems: { item: { id: string } }[] = [];
+      orderData.items.forEach((ci) => {
+        const id = ci.clover_item_id;
+        const qty = sanitizeQuantity(ci.quantity);
+        for (let i = 0; i < qty; i++) {
+          lineItems.push({ item: { id } });
+        }
+      });
+      
+      const upstreamBody = { orderCart: { lineItems } };
+      
+      return request<{ success: boolean; order: Order; message: string }>('/api/orders', {
         method: 'POST',
-        body: JSON.stringify(orderData),
-      }),
+        body: JSON.stringify(upstreamBody),
+      });
+    },
   },
   sync: {
     products: () =>

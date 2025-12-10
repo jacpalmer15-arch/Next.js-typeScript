@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { CartItem, PaymentMethod, Order } from '@/lib/types';
+import { createBackendHeaders, validateAuthHeader, unauthorizedResponse } from '@/lib/auth-utils';
+import { Order } from '@/lib/types';
 
-// Mock data for orders since there's no backend yet
+const BASE = process.env.BACKEND_BASE;
+
+// Mock data for orders when no backend is configured
 const mockOrders: Order[] = [
   {
     id: 'ord_001',
@@ -10,7 +13,7 @@ const mockOrders: Order[] = [
     status: 'paid',
     created_at: '2024-01-15T10:30:00Z',
     updated_at: '2024-01-15T10:35:00Z',
-    total_amount: 2599, // $25.99
+    total_amount: 2599,
     items: [
       {
         id: 'item_001',
@@ -31,112 +34,92 @@ const mockOrders: Order[] = [
     ],
     notes: 'Customer requested extra hot coffee',
   },
-  {
-    id: 'ord_002',
-    customer_name: 'Jane Smith',
-    customer_email: 'jane@example.com',
-    status: 'pending',
-    created_at: '2024-01-15T11:15:00Z',
-    updated_at: '2024-01-15T11:15:00Z',
-    total_amount: 1799, // $17.99
-    items: [
-      {
-        id: 'item_003',
-        clover_item_id: 'clv_789',
-        name: 'Latte',
-        quantity: 1,
-        unit_price: 549,
-        total_price: 549,
-      },
-      {
-        id: 'item_004',
-        clover_item_id: 'clv_101',
-        name: 'Muffin',
-        quantity: 1,
-        unit_price: 1250,
-        total_price: 1250,
-      }
-    ],
-    notes: null,
-  }
 ];
 
 export async function POST(request: NextRequest) {
+  if (!validateAuthHeader(request)) {
+    return unauthorizedResponse();
+  }
+
+  const body = await request.text();
+
+  if (!BASE) {
+    // Simulate order creation when no backend is configured
+    try {
+      // Validate JSON format
+      const data = JSON.parse(body);
+      const orderId = `ord_${Date.now()}`;
+      
+      // Simple validation: ensure orderCart.lineItems exists
+      if (!data.orderCart || !Array.isArray(data.orderCart.lineItems)) {
+        return new Response(JSON.stringify({ success: false, message: 'Invalid orderCart format' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+      
+      const newOrder: Order = {
+        id: orderId,
+        customer_name: null,
+        customer_email: null,
+        status: 'pending',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        total_amount: 0,
+        items: [],
+        notes: null,
+      };
+
+      return NextResponse.json({
+        success: true,
+        order: newOrder,
+        message: 'Order created successfully (simulated - no BACKEND_BASE configured)'
+      });
+    } catch {
+      return new Response(JSON.stringify({ success: false, message: 'Invalid request body' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+  }
+
   try {
-    const body = await request.json();
-    const { items, subtotal, tax, total, payment_method } = body;
-
-    // Validate required fields
-    if (!items || !Array.isArray(items) || items.length === 0) {
-      return NextResponse.json(
-        { error: 'Items are required' },
-        { status: 400 }
-      );
-    }
-
-    if (!payment_method || !total) {
-      return NextResponse.json(
-        { error: 'Payment method and total are required' },
-        { status: 400 }
-      );
-    }
-
-    // Generate new order ID
-    const orderId = `ord_${Date.now()}`;
-    
-    // Create order items
-    const orderItems = items.map((item: any, index: number) => ({
-      id: `item_${Date.now()}_${index}`,
-      clover_item_id: item.clover_item_id,
-      name: item.name,
-      quantity: item.quantity,
-      unit_price: item.price,
-      total_price: item.price * item.quantity,
-    }));
-
-    // Create new order
-    const newOrder: Order = {
-      id: orderId,
-      customer_name: null,
-      customer_email: null,
-      status: 'pending',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      total_amount: total,
-      items: orderItems,
-      notes: null,
-    };
-
-    // Add to mock storage
-    mockOrders.push(newOrder);
-
-    return NextResponse.json({
-      success: true,
-      order: newOrder,
-      message: 'Order created successfully'
+    const upstream = await fetch(`${BASE}/api/orders`, {
+      method: 'POST',
+      headers: createBackendHeaders(request),
+      body,
+      cache: 'no-store',
     });
 
+    const text = await upstream.text();
+    return new Response(text, {
+      status: upstream.status,
+      headers: { 'Content-Type': upstream.headers.get('content-type') ?? 'application/json' },
+    });
   } catch (error) {
-    console.error('Error creating order:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    console.error('Failed to forward /api/orders to upstream:', error);
+    return new Response(JSON.stringify({ success: false, message: 'Upstream request failed' }), {
+      status: 502,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 }
 
 export async function GET() {
-  try {
+  // Return mock orders when no backend is configured
+  if (!BASE) {
     return NextResponse.json({
       success: true,
-      orders: mockOrders.slice(-20), // Return last 20 orders
+      orders: mockOrders,
       count: mockOrders.length
     });
-  } catch (error) {
-    console.error('Error fetching orders:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
   }
+
+  // For GET requests with backend, we could proxy here too
+  // For now, keeping the mock behavior
+  return NextResponse.json({
+    success: true,
+    orders: mockOrders,
+    count: mockOrders.length
+  });
 }

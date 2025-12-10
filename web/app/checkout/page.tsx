@@ -37,22 +37,17 @@ export default function CheckoutPage() {
     setIsProcessing(true);
     
     try {
-      // TODO: Integrate with Clover Mini for payment capture
-      // This will handle the actual payment processing with the Clover device
-      
-      // Create order via API
-      const orderData = {
-        items: cart,
-        subtotal,
-        tax,
-        total,
-        payment_method: paymentMethod,
-      };
+      // api.orders.create will transform the UI cart into the upstream orderCart.lineItems shape
+      const result = await api.orders.create({ 
+        items: cart, 
+        subtotal, 
+        tax, 
+        total, 
+        payment_method: paymentMethod 
+      });
 
-      const result = await api.orders.create(orderData);
-
-      if (!result.success || !result.order) {
-        throw new Error('Failed to create order');
+      if (!result || !result.success || !result.order) {
+        throw new Error(result?.message || 'Failed to create order');
       }
 
       toast.success(`${result.message} - Total: ${formatCurrency(total)}`);
