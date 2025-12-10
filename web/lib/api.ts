@@ -112,10 +112,14 @@ export const api = {
     }) => {
       // Transform UI cart into upstream orderCart.lineItems shape
       // Each quantity unit becomes a separate lineItem with the same clover_item_id
+      function sanitizeQuantity(quantity: number): number {
+        return Math.max(0, Number(quantity) || 0);
+      }
+      
       const lineItems: { item: { id: string } }[] = [];
       orderData.items.forEach((ci) => {
         const id = ci.clover_item_id;
-        const qty = Math.max(0, Number(ci.quantity) || 0);
+        const qty = sanitizeQuantity(ci.quantity);
         for (let i = 0; i < qty; i++) {
           lineItems.push({ item: { id } });
         }

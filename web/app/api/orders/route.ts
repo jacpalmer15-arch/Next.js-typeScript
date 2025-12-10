@@ -46,8 +46,17 @@ export async function POST(request: NextRequest) {
   if (!BASE) {
     // Simulate order creation when no backend is configured
     try {
-      JSON.parse(body); // Validate JSON
+      // Validate JSON format
+      const data = JSON.parse(body);
       const orderId = `ord_${Date.now()}`;
+      
+      // Simple validation: ensure orderCart.lineItems exists
+      if (!data.orderCart || !Array.isArray(data.orderCart.lineItems)) {
+        return new Response(JSON.stringify({ success: false, message: 'Invalid orderCart format' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
       
       const newOrder: Order = {
         id: orderId,
