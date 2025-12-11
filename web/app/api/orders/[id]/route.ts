@@ -1,5 +1,7 @@
 import { NextRequest } from 'next/server';
-import { Order, OrderStatus } from '@/lib/types';
+import { OrderStatus } from '@/lib/types';
+import { validateAuthHeader, unauthorizedResponse } from '@/lib/auth-utils';
+import { supabase } from '@/lib/supabase';
 
 // This would normally come from a database or external service
 // For now, we're using the same mock data as in the main orders route
@@ -126,46 +128,94 @@ const mockOrders: Order[] = [
 ];
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params;
-  const order = mockOrders.find(o => o.id === id);
-  
-  if (!order) {
-    return new Response('Order not found', { status: 404 });
+  if (!validateAuthHeader(request)) {
+    return unauthorizedResponse();
   }
 
-  return Response.json(order);
+  const { id } = await params;
+
+  try {
+    const { data, error } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      console.error('Supabase error fetching order:', error);
+      // Fall back to mock order on error
+      const order = mockOrders.find(o => o.id === id);
+      if (order) {
+        return Response.json(order);
+      }
+      return new Response('Order not found', { status: 404 });
+    }
+
+    if (!data) {
+      return new Response('Order not found', { status: 404 });
+    }
+
+    return Response.json(data);
+  } catch (error) {
+    console.error('Failed to fetch order:', error);
+    // Fall back to mock order
+    const order = mockOrders.find(o => o.id === id);
+    if (order) {
+      return Response.json(order);
+    }
+    return new Response('Order not found', { status: 404 });
+  }
 }
 
 export async function PATCH(
-  req: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params;
-  const orderIndex = mockOrders.findIndex(o => o.id === id);
-  
-  if (orderIndex === -1) {
-    return new Response('Order not found', { status: 404 });
+  if (!validateAuthHeader(request)) {
+    return unauthorizedResponse();
   }
 
+  const { id } = await params;
+
   try {
-    const updates = await req.json();
+    const updates = await request.json();
     
     // Only allow status updates for now
-    if (updates.status && ['pending', 'paid', 'fulfilled', 'canceled'].includes(updates.status)) {
-      mockOrders[orderIndex] = {
-        ...mockOrders[orderIndex],
+    if (!updates.status || !['pending', 'paid', 'fulfilled', 'canceled'].includes(updates.status)) {
+      return new Response('Invalid update data', { status: 400 });
+    }
+
+    const { data, error } = await supabase
+      .from('orders')
+      .update({
         status: updates.status as OrderStatus,
         updated_at: new Date().toISOString(),
-      };
-      
-      return Response.json(mockOrders[orderIndex]);
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Supabase error updating order:', error);
+      return new Response(
+        JSON.stringify({ error: error.message }), 
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
     }
-    
-    return new Response('Invalid update data', { status: 400 });
-  } catch {
-    return new Response('Invalid JSON', { status: 400 });
+
+    if (!data) {
+      return new Response('Order not found', { status: 404 });
+    }
+
+    return Response.json(data);
+  } catch (error) {
+    console.error('Failed to update order:', error);
+    return new Response(
+      JSON.stringify({ error: 'Failed to update order' }), 
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
   }
 }

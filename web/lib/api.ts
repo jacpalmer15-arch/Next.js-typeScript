@@ -127,7 +127,7 @@ export const api = {
       
       const upstreamBody = { orderCart: { lineItems } };
       
-      return request<{ success: boolean; order: Order; message: string }>('/api/orders', {
+      return request<{ success: boolean; order: Order; message: string }>('/api/checkout', {
         method: 'POST',
         body: JSON.stringify(upstreamBody),
       });

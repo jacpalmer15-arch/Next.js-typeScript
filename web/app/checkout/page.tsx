@@ -46,16 +46,25 @@ export default function CheckoutPage() {
         payment_method: paymentMethod 
       });
 
-      if (!result || !result.success || !result.order) {
+      console.log('Order creation result:', result);
+
+      // Check if order was created successfully
+      if (!result || result.success === false) {
         throw new Error(result?.message || 'Failed to create order');
       }
 
-      toast.success(`${result.message} - Total: ${formatCurrency(total)}`);
+      // Order created successfully
+      const message = result.message || 'Order created successfully';
+      toast.success(`${message} - Total: ${formatCurrency(total)}`);
       clearCart();
       setPaymentMethod('card');
       
-      // Redirect to order detail page
-      router.push(`/orders/${result.order.id}`);
+      // Redirect to orders page (or specific order if ID is available)
+      if (result.order?.id) {
+        router.push(`/orders/${result.order.id}`);
+      } else {
+        router.push('/orders');
+      }
     } catch (error) {
       console.error('Checkout error:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to process order. Please try again.');
