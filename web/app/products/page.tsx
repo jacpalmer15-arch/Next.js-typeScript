@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { api } from '@/lib/api';
 import { productColumns } from '@/components/products/columns';
@@ -8,18 +8,70 @@ import { EnhancedDataTable } from '@/components/products/enhanced-data-table';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { supabase } from '@/lib/supabase';
 
 import type { ApiProduct, ProductTableRow } from '@/lib/types';
+
+type CategoryVisibilityMap = Record<string, { total: number; visible: number }>;
 
 export default function ProductsPage() {
   const [search, setSearch] = useState('');
   const [kioskOnly, setKioskOnly] = useState(false);
   const [category, setCategory] = useState<string>('all');
+  const [updatingCategoryId, setUpdatingCategoryId] = useState<string | null>(null);
+  const [categoryVisibilityMessage, setCategoryVisibilityMessage] = useState('');
+  const [categoryVisibilityError, setCategoryVisibilityError] = useState('');
 
   // Fetch categories
   const { data: categories = [], isLoading: isCatLoading, isError: isCatError, error: catError } = useQuery({
     queryKey: ['categories'],
     queryFn: api.categories.list,
+  });
+
+  const { data: categoryVisibility = {}, isLoading: isCategoryVisibilityLoading, refetch: refetchCategoryVisibility } = useQuery<CategoryVisibilityMap>({
+    queryKey: ['category-visibility'],
+    queryFn: async () => {
+      const visibility = new Map<string, { total: number; visible: number }>();
+      let offset = 0;
+      const limit = 1000;
+      let hasMore = true;
+
+      while (hasMore) {
+        const { data, error } = await supabase
+          .from('products')
+          .select('category_id, visible_in_kiosk')
+          .range(offset, offset + limit - 1);
+
+        if (error) {
+          console.error('Error fetching category visibility:', error);
+          throw error;
+        }
+
+        if (!data || data.length === 0) {
+          break;
+        }
+
+        data.forEach((row) => {
+          const key = row.category_id ?? 'uncategorized';
+          if (!visibility.has(key)) {
+            visibility.set(key, { total: 0, visible: 0 });
+          }
+          const entry = visibility.get(key)!;
+          entry.total += 1;
+          if (row.visible_in_kiosk) {
+            entry.visible += 1;
+          }
+        });
+
+        if (data.length < limit) {
+          hasMore = false;
+        } else {
+          offset += limit;
+        }
+      }
+
+      return Object.fromEntries(visibility);
+    },
   });
 
   // Fetch products as ApiProduct[]
@@ -32,6 +84,31 @@ export default function ProductsPage() {
         category: category !== 'all' ? category : undefined,
       }),
   });
+
+  const categoryVisibilityMutation = useMutation({
+    mutationFn: ({ categoryId, visible }: { categoryId: string; visible: boolean }) =>
+      api.products.setCategoryVisibility(categoryId, visible),
+  });
+
+  const handleCategoryToggle = async (categoryId: string, nextVisible: boolean, categoryName: string) => {
+    setCategoryVisibilityMessage('');
+    setCategoryVisibilityError('');
+    setUpdatingCategoryId(categoryId);
+    try {
+      await categoryVisibilityMutation.mutateAsync({ categoryId, visible: nextVisible });
+      await Promise.all([refetchCategoryVisibility(), refetch()]);
+      setCategoryVisibilityMessage(
+        nextVisible
+          ? `${categoryName} items are now visible in the kiosk.`
+          : `${categoryName} items are now hidden from the kiosk.`
+      );
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to update category visibility.';
+      setCategoryVisibilityError(message);
+    } finally {
+      setUpdatingCategoryId(null);
+    }
+  };
 
   // Map API data to table row shape
   const products: ProductTableRow[] = rawProducts.map((row) => ({
@@ -84,6 +161,56 @@ export default function ProductsPage() {
           />
           Show kiosk-visible only
         </label>
+      </div>
+
+      <div className="mb-6 rounded-lg border bg-white p-4 shadow-sm">
+        <div className="mb-3 flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-medium">Category Kiosk Visibility</h2>
+            <p className="text-xs text-gray-500">Toggle all products within a category on or off for the kiosk.</p>
+          </div>
+        </div>
+        {categoryVisibilityMessage && (
+          <p className="mb-2 text-sm text-green-600">{categoryVisibilityMessage}</p>
+        )}
+        {categoryVisibilityError && (
+          <p className="mb-2 text-sm text-red-600">{categoryVisibilityError}</p>
+        )}
+        {isCatLoading || isCategoryVisibilityLoading ? (
+          <p className="text-sm text-gray-500">Loading categories…</p>
+        ) : (
+          <div className="divide-y rounded-md border">
+            {categories.map((cat: { id: string; name: string }) => {
+              const stats = categoryVisibility[cat.id] ?? { total: 0, visible: 0 };
+              const isVisible = stats.visible > 0;
+              const isUpdating = updatingCategoryId === cat.id || categoryVisibilityMutation.isPending;
+
+              return (
+                <div key={cat.id} className="flex items-center justify-between p-3">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">{cat.name}</p>
+                    <p className="text-xs text-gray-500">
+                      {stats.visible} of {stats.total} items currently kiosk-visible
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => handleCategoryToggle(cat.id, !isVisible, cat.name)}
+                    disabled={isUpdating}
+                    className={`rounded-md px-3 py-2 text-sm font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                      isVisible ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'
+                    }`}
+                  >
+                    {isUpdating
+                      ? 'Updating…'
+                      : isVisible
+                        ? 'Hide in kiosk'
+                        : 'Show in kiosk'}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       <div className="flex gap-3 mb-6">

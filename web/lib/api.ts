@@ -82,6 +82,14 @@ export const api = {
         method: 'PATCH',
         body: JSON.stringify(patch),
       }),
+    setCategoryVisibility: (categoryId: string, visible: boolean) =>
+      request<{ success: boolean; updated: number; category_id: string; visible_in_kiosk: boolean }>(
+        '/api/products/category-visibility',
+        {
+          method: 'POST',
+          body: JSON.stringify({ category_id: categoryId, visible_in_kiosk: visible }),
+        }
+      ),
   },
   inventory: {
     all: () => request<InventoryRow[]>('/api/inventory'),
