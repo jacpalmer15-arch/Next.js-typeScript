@@ -37,14 +37,42 @@ export default function Home() {
         item => item.reorder_level !== null && item.on_hand <= item.reorder_level
       ).length || 0;
 
-      // Fetch all transactions for order stats
-      const { data: transactions } = await supabase
+      // Fetch total order count
+      const { count: totalOrders } = await supabase
         .from('transactions')
-        .select('status, total_cents');
+        .select('*', { count: 'exact', head: true });
 
-      const totalOrders = transactions?.length || 0;
-      const openOrders = transactions?.filter(t => t.status === 'OPEN').length || 0;
-      const totalRevenue = transactions?.reduce((sum, t) => sum + (t.total_cents || 0), 0) || 0;
+      // Fetch open orders count
+      const { count: openOrders } = await supabase
+        .from('transactions')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'OPEN');
+
+      // For status breakdown and totals, we need to fetch all transactions
+      // Use range to get all rows (Supabase default limit is 1000)
+      let allTransactions: { status: string; total_cents: number }[] = [];
+      let hasMore = true;
+      let offset = 0;
+      const limit = 1000;
+
+      while (hasMore) {
+        const { data, error } = await supabase
+          .from('transactions')
+          .select('status, total_cents')
+          .range(offset, offset + limit - 1);
+        
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          allTransactions = [...allTransactions, ...data];
+          offset += limit;
+          hasMore = data.length === limit;
+        } else {
+          hasMore = false;
+        }
+      }
+
+      const totalRevenue = allTransactions.reduce((sum, t) => sum + (t.total_cents || 0), 0) || 0;
 
       // Calculate status breakdown
       const statusBreakdown = {
@@ -54,7 +82,7 @@ export default function Home() {
         REFUNDED: { count: 0, total: 0 },
       };
 
-      transactions?.forEach(t => {
+      allTransactions.forEach(t => {
         if (statusBreakdown[t.status as keyof typeof statusBreakdown]) {
           statusBreakdown[t.status as keyof typeof statusBreakdown].count++;
           statusBreakdown[t.status as keyof typeof statusBreakdown].total += t.total_cents;

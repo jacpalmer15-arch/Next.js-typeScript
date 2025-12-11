@@ -24,31 +24,48 @@ export default function OrdersPage() {
       to_date: toDate 
     }],
     queryFn: async () => {
-      // Build Supabase query for transactions with line items
-      let query = supabase
-        .from('transactions')
-        .select('*, transaction_items(*)')
-        .order('created_at', { ascending: false });
+      // Fetch ALL transactions with line items (paginated to avoid 1000 row limit)
+      let allTransactions: Transaction[] = [];
+      let hasMore = true;
+      let offset = 0;
+      const limit = 1000;
 
-      // Apply filters
-      if (statusFilter !== 'all') {
-        query = query.eq('status', statusFilter.toUpperCase());
-      }
-      if (fromDate) {
-        query = query.gte('created_at', fromDate);
-      }
-      if (toDate) {
-        query = query.lte('created_at', toDate);
+      while (hasMore) {
+        // Build Supabase query for transactions with line items
+        let query = supabase
+          .from('transactions')
+          .select('*, transaction_items(*)')
+          .order('created_at', { ascending: false })
+          .range(offset, offset + limit - 1);
+
+        // Apply filters
+        if (statusFilter !== 'all') {
+          query = query.eq('status', statusFilter.toUpperCase());
+        }
+        if (fromDate) {
+          query = query.gte('created_at', fromDate);
+        }
+        if (toDate) {
+          query = query.lte('created_at', toDate);
+        }
+
+        const { data, error } = await query;
+
+        if (error) {
+          console.error('Error fetching transactions:', error);
+          throw error;
+        }
+
+        if (data && data.length > 0) {
+          allTransactions = [...allTransactions, ...data as Transaction[]];
+          offset += limit;
+          hasMore = data.length === limit;
+        } else {
+          hasMore = false;
+        }
       }
 
-      const { data, error } = await query;
-
-      if (error) {
-        console.error('Error fetching transactions:', error);
-        throw error;
-      }
-
-      return (data || []) as Transaction[];
+      return allTransactions;
     },
   });
 
