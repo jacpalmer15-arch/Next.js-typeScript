@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
   const t = setTimeout(() => controller.abort(), SYNC_TIMEOUT_MS);
 
   try {
-    const upstream = await fetch(`${BASE}/api/products/sync`, {
+    const upstream = await fetch(`${BASE}/api/products/sync-orders`, {
       method: 'POST',
       headers: createBackendHeaders(request),
       signal: controller.signal,
@@ -29,10 +29,10 @@ export async function POST(request: NextRequest) {
     const err = e as Error;
     const isTimeout = err?.name === 'AbortError';
     const msg = isTimeout
-      ? `Product sync timed out after ${SYNC_TIMEOUT_MS / 1000} seconds (${SYNC_TIMEOUT_MS / 60000} minutes). The backend may still be processing.`
-      : (err?.message || 'Upstream sync failed');
+      ? `Order sync timed out after ${SYNC_TIMEOUT_MS / 1000} seconds (${SYNC_TIMEOUT_MS / 60000} minutes). The backend may still be processing. Check your database for synced orders.`
+      : (err?.message || 'Upstream order sync failed');
     
-    console.error('Product sync error:', err);
+    console.error('Order sync error:', err);
     
     return new Response(JSON.stringify({ 
       success: false, 
